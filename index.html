@@ -66,36 +66,25 @@
         
         .btn-custom { 
             background: none; border: none;
-            text-decoration: none; 
             display: flex; flex-direction: column; align-items: center; 
-            color: #333 !important; padding: 0;
+            color: #333 !important; text-decoration: none; padding: 0;
         }
 
         .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; }
         .btn-icon-img { width: 24px; height: 24px; object-fit: contain; }
 
         .action-btn {
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 8px 5px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: var(--pakar-main);
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-color: white; border: 1px solid #ccc; border-radius: 8px;
+            padding: 8px 5px; font-size: 0.75rem; font-weight: bold;
+            color: var(--pakar-main); height: 100%; display: flex;
+            align-items: center; justify-content: center;
         }
 
         .form-select { 
-            font-size: 0.85rem; 
-            padding: 8px 10px 8px 30px !important; 
-            border-radius: 8px; 
-            appearance: none;
+            font-size: 0.85rem; padding: 8px 10px 8px 30px !important; 
+            border-radius: 8px; appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 10px center;
+            background-repeat: no-repeat; background-position: left 10px center;
             background-color: white;
         }
 
@@ -105,7 +94,7 @@
 </head>
 <body>
 
-<div class="version-badge">1.2.33</div>
+<div class="version-badge">1.2.34</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -116,7 +105,7 @@
     <div class="search-container">
         <div class="row g-1 align-items-stretch">
             <div class="col-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="handleSearchInput()">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." oninput="debouncedSearch()">
             </div>
             <div class="col-3">
                 <button onclick="resetAll()" class="action-btn w-100">✖ נקה</button>
@@ -144,6 +133,8 @@
 
 <script>
     let allContacts = [];
+    let searchTimeout;
+
     const getCsvUrl = () => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
 
     function normalize(str) {
@@ -151,134 +142,70 @@
     }
 
     function loadData(isRefresh = false) {
-        if(isRefresh) {
-            document.getElementById('contactsGrid').innerHTML = '<div class="text-center w-100 mt-4">מרענן נתונים...</div>';
-        }
+        if(isRefresh) document.getElementById('contactsGrid').innerHTML = '<div class="text-center w-100 mt-4">מרענן...</div>';
         
         fetch(getCsvUrl()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
                 header: true,
+                skipEmptyLines: true,
                 complete: function(r) {
                     allContacts = r.data.map(row => ({
-                        firstName: (row['firstName'] || '').trim(),
-                        lastName: (row['lastName'] || '').trim(),
+                        name: `${(row['firstName'] || '')} ${(row['lastName'] || '')}`.trim(),
                         pluga: (row['pluga'] || '').trim(),
                         framework: (row['framework'] || '').trim(),
                         role: (row['role'] || '').trim(),
                         mobile: (row['mobile'] || '').trim(),
-                        mobileWA: (row['mobileWA'] || '').trim()
-                    })).filter(c => c.firstName !== '');
+                        mobileWA: (row['mobileWA'] || '').trim(),
+                        searchKey: `${row['firstName']} ${row['lastName']} ${row['role']} ${row['pluga']} ${row['framework']}`.toLowerCase()
+                    })).filter(c => c.name !== '');
                     
-                    updateFiltersBasedOnSearch();
+                    updateDropdowns(allContacts, true, true);
                     renderContacts(allContacts);
                 }
             });
         });
     }
 
-    function updateFiltersBasedOnSearch() {
+    function debouncedSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            updateDropdowns(getFilteredList(), true, false);
+            filterContacts();
+        }, 250);
+    }
+
+    function getFilteredList() {
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const matchedContacts = allContacts.filter(c => 
-            `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase().includes(term)
-        );
+        return term ? allContacts.filter(c => c.searchKey.includes(term)) : allContacts;
+    }
 
-        updateCompanyDropdown(matchedContacts);
-        
-        // אם נבחרה פלוגה, נעדכן גם את המסגרות בהתאם לחיפוש
-        const selectedCompany = document.getElementById('companyFilter').value;
-        if (selectedCompany) {
-            updateFrameworkDropdown(matchedContacts.filter(c => normalize(c.pluga) === normalize(selectedCompany)));
+    function updateDropdowns(list, updatePluga, updateFrame) {
+        if (updatePluga) {
+            const pSel = document.getElementById('companyFilter');
+            const current = pSel.value;
+            const plugot = [...new Set(list.map(c => c.pluga))].filter(Boolean).sort();
+            let html = '<option value="">כל הפלוגות</option>';
+            plugot.forEach(p => html += `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`);
+            pSel.innerHTML = html;
         }
-    }
 
-    function updateCompanyDropdown(contactsList) {
-        const pSel = document.getElementById('companyFilter');
-        const currentVal = pSel.value;
-        const plugot = [...new Set(contactsList.map(c => c.pluga))].filter(Boolean).sort();
-        
-        pSel.innerHTML = '<option value="">כל הפלוגות</option>';
-        plugot.forEach(p => {
-            pSel.innerHTML += `<option value="${p}" ${p === currentVal ? 'selected' : ''}>${p}</option>`;
-        });
-    }
-
-    function updateFrameworkDropdown(contactsList) {
+        const pVal = document.getElementById('companyFilter').value;
         const fSel = document.getElementById('unitFilter');
-        const currentVal = fSel.value;
-        const frames = [...new Set(contactsList.map(c => c.framework))].filter(Boolean).sort();
-        
-        fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        frames.forEach(f => {
-            fSel.innerHTML += `<option value="${f}" ${f === currentVal ? 'selected' : ''}>${f}</option>`;
-        });
-    }
-
-    function handleSearchInput() {
-        updateFiltersBasedOnSearch();
-        filterContacts();
+        if (pVal) {
+            fSel.disabled = false;
+            const frames = [...new Set(list.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
+            let fHtml = '<option value="">כל המסגרות</option>';
+            frames.forEach(f => fHtml += `<option value="${f}">${f}</option>`);
+            fSel.innerHTML = fHtml;
+        } else {
+            fSel.disabled = true;
+            fSel.innerHTML = '<option value="">כל המסגרות</option>';
+        }
     }
 
     function handleCompanyChange() {
-        const pVal = document.getElementById('companyFilter').value;
-        const fSel = document.getElementById('unitFilter');
-
-        if (!pVal) {
-            fSel.value = "";
-            fSel.disabled = true;
-            fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        } else {
-            fSel.disabled = false;
-            // מעדכנים מסגרות לפי הפלוגה והחיפוש הנוכחי
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allContacts.filter(c => 
-                normalize(c.pluga) === normalize(pVal) && 
-                `${c.firstName} ${c.lastName} ${c.role} ${c.framework}`.toLowerCase().includes(term)
-            );
-            updateFrameworkDropdown(filtered);
-        }
+        updateDropdowns(getFilteredList(), false, true);
         filterContacts();
-    }
-
-    function resetAll() {
-        document.getElementById('searchInput').value = "";
-        const pSel = document.getElementById('companyFilter');
-        const fSel = document.getElementById('unitFilter');
-        pSel.value = "";
-        fSel.value = "";
-        fSel.disabled = true;
-        
-        updateFiltersBasedOnSearch();
-        renderContacts(allContacts);
-    }
-
-    function renderContacts(list) {
-        const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = list.length ? '' : '<div class="text-center w-100 mt-4">אין תוצאות</div>';
-        list.forEach(c => {
-            grid.innerHTML += `
-                <div class="contact-col">
-                    <div class="contact-card">
-                        <div>
-                            <div class="name-header">${c.firstName} ${c.lastName}</div>
-                            <div class="info-sub">${c.pluga} • ${c.framework}<br>${c.role}</div>
-                        </div>
-                        <div class="btn-group-custom">
-                            <a href="tel:${c.mobile}" class="btn-custom">
-                                <img src="phone-call.png" class="btn-icon-img" alt="חייג">
-                                <span class="btn-label">חייג</span>
-                            </a>
-                            <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom">
-                                <img src="whatsapp.png" class="btn-icon-img" alt="הודעה">
-                                <span class="btn-label">הודעה</span>
-                            </a>
-                            <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="btn-custom">
-                                <img src="contact.png" class="btn-icon-img" alt="שמירה">
-                                <span class="btn-label">שמירה</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-        });
     }
 
     function filterContacts() {
@@ -287,30 +214,63 @@
         const f = document.getElementById('unitFilter').value;
         
         const res = allContacts.filter(c => {
-            const matchSearch = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase().includes(term);
-            const matchP = !p || normalize(c.pluga) === normalize(p);
-            const matchF = !f || normalize(c.framework) === normalize(f);
-            return matchSearch && matchP && matchF;
+            const mSearch = !term || c.searchKey.includes(term);
+            const mP = !p || c.pluga === p;
+            const mF = !f || c.framework === f;
+            return mSearch && mP && mF;
         });
         renderContacts(res);
     }
 
-    function saveVCard(f, l, p, pluga, frame, role) {
-        const vcard = [
-            'BEGIN:VCARD',
-            'VERSION:3.0',
-            `FN;CHARSET=UTF-8:${f} ${l}`,
-            `N;CHARSET=UTF-8:${l};${f};;;`,
-            `TEL;TYPE=CELL:${p}`,
-            `ORG;CHARSET=UTF-8:${pluga} - ${frame}`,
-            `TITLE;CHARSET=UTF-8:${role}`,
-            'END:VCARD'
-        ].join('\n');
+    function resetAll() {
+        document.getElementById('searchInput').value = "";
+        document.getElementById('companyFilter').value = "";
+        document.getElementById('unitFilter').value = "";
+        document.getElementById('unitFilter').disabled = true;
+        updateDropdowns(allContacts, true, true);
+        renderContacts(allContacts);
+    }
 
+    function renderContacts(list) {
+        const grid = document.getElementById('contactsGrid');
+        if (!list.length) {
+            grid.innerHTML = '<div class="text-center w-100 mt-4">אין תוצאות</div>';
+            return;
+        }
+
+        const html = list.map(c => `
+            <div class="contact-col">
+                <div class="contact-card">
+                    <div>
+                        <div class="name-header">${c.name}</div>
+                        <div class="info-sub">${c.pluga} • ${c.framework}<br>${c.role}</div>
+                    </div>
+                    <div class="btn-group-custom">
+                        <a href="tel:${c.mobile}" class="btn-custom">
+                            <img src="phone-call.png" class="btn-icon-img" alt="חייג">
+                            <span class="btn-label">חייג</span>
+                        </a>
+                        <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom">
+                            <img src="whatsapp.png" class="btn-icon-img" alt="הודעה">
+                            <span class="btn-label">הודעה</span>
+                        </a>
+                        <button onclick="saveVCard('${c.name}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="btn-custom">
+                            <img src="contact.png" class="btn-icon-img" alt="שמירה">
+                            <span class="btn-label">שמירה</span>
+                        </button>
+                    </div>
+                </div>
+            </div>`).join('');
+        
+        grid.innerHTML = html;
+    }
+
+    function saveVCard(name, phone, pluga, frame, role) {
+        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${name}\nTEL;TYPE=CELL:${phone}\nORG;CHARSET=UTF-8:${pluga} - ${frame}\nTITLE;CHARSET=UTF-8:${role}\nEND:VCARD`;
         const blob = new Blob([vcard], {type:'text/vcard;charset=utf-8'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `${f}_${l}.vcf`;
+        a.download = `${name.replace(/\s+/g, '_')}.vcf`;
         a.click();
     }
 
