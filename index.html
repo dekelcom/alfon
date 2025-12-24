@@ -23,15 +23,15 @@
 
         .header-section {
             text-align: center;
-            padding: 10px 0;
+            padding: 8px 0;
             background: white;
             border-bottom: 2px solid var(--pakar-accent);
         }
 
         .unit-logo {
-            width: 45px;
+            width: 40px; /* לוגו מוקטן */
             height: auto;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .header-section h4 { font-size: 1.1rem; margin: 0; font-weight: bold; }
@@ -39,60 +39,61 @@
         .search-container { 
             position: sticky; top: 0; 
             background: var(--pakar-bg); 
-            z-index: 1000; padding: 8px;
+            z-index: 1000; padding: 6px;
         }
 
-        .contacts-grid { display: flex; flex-wrap: wrap; padding: 4px; }
+        .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
 
         .contact-col {
-            flex: 0 0 50%;
+            flex: 0 0 50%; /* 2 כרטיסים בשורה */
             max-width: 50%;
             padding: 4px;
         }
 
         .contact-card { 
             background: white; 
-            border-radius: 10px; 
-            padding: 12px 8px; 
+            border-radius: 12px; 
+            padding: 12px 6px; 
             box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
             height: 100%; 
             display: flex; flex-direction: column; justify-content: space-between;
             text-align: center;
         }
 
-        .name-header { font-size: 0.95rem; font-weight: bold; color: #000; margin-bottom: 3px; }
-        .info-sub { font-size: 0.7rem; color: #666; margin-bottom: 12px; line-height: 1.2; }
+        .name-header { font-size: 0.95rem; font-weight: bold; color: #000; margin-bottom: 2px; }
+        .info-sub { font-size: 0.75rem; color: #666; margin-bottom: 10px; line-height: 1.2; }
         
         .btn-group-custom { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;
-            border-top: 1px solid #eee; padding-top: 8px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+            border-top: 1px solid #f0f0f0; padding-top: 10px;
         }
         
         .btn-custom { 
             background: none; border: none;
             text-decoration: none; 
             display: flex; flex-direction: column; align-items: center; 
-            color: #333 !important; padding: 2px;
+            color: #333 !important; padding: 0;
         }
 
-        .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; }
+        .btn-label { font-size: 0.7rem; font-weight: bold; margin-top: 4px; }
         
-        /* עיצוב אייקונים ללא רקע */
-        .btn-icon-img { width: 22px; height: 22px; object-fit: contain; }
-        .icon-color-main { color: var(--pakar-main); font-size: 20px; }
-        .icon-color-accent { color: var(--pakar-accent); font-size: 20px; }
-        .icon-color-wa { color: #25D366; font-size: 20px; }
+        /* שימוש באייקונים ששלחת - גודל אחיד */
+        .btn-icon-img { 
+            width: 24px; 
+            height: 24px; 
+            object-fit: contain; 
+        }
 
-        .form-control, .form-select { font-size: 0.85rem; padding: 6px; border-radius: 6px; }
+        .form-control, .form-select { font-size: 0.85rem; padding: 6px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">1.2.5</div>
+<div class="version-badge">1.2.6</div>
 
 <div class="header-section">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
+    <img src="Pakar.svg.png" alt="לוגו" class="unit-logo">
     <h4>גדוד 882 - אלפון יחידתי</h4>
 </div>
 
@@ -100,7 +101,7 @@
     <div class="search-container">
         <div class="row g-1">
             <div class="col-12 mb-1">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש לפי שם, תפקיד או פלוגה..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -122,6 +123,7 @@
 
 <script>
     let allContacts = [];
+    // קישור ה-CSV המקורי שלך
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
 
     function normalize(str) {
@@ -179,15 +181,15 @@
                         </div>
                         <div class="btn-group-custom">
                             <a href="tel:${c.mobile}" class="btn-custom">
-                                <span class="icon-color-accent">📞</span>
+                                <img src="phone-call.png" class="btn-icon-img" alt="חייג">
                                 <span class="btn-label">חייג</span>
                             </a>
                             <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="btn-icon-img">
+                                <img src="whatsapp.png" class="btn-icon-img" alt="הודעה">
                                 <span class="btn-label">הודעה</span>
                             </a>
                             <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}')" class="btn-custom">
-                                <span class="icon-color-main">👤</span>
+                                <img src="contact.png" class="btn-icon-img" alt="שמירה">
                                 <span class="btn-label">שמירה</span>
                             </button>
                         </div>
