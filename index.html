@@ -3,138 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אלפון יחידתי - פיקוד העורף</title>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <title>אלפון יחידתי</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
     <style>
         :root {
-            --pakar-orange: #d14a24; /* צבע חם מהפלטה */
-            --pakar-brown: #7c4535;  /* צבע חום מהפלטה */
-            --pakar-bg: #f8f9fa;
+            --pakar-main: #7c4535; /* חום מהפלטה */
+            --pakar-accent: #d14a24; /* כתום מהפלטה */
+            --pakar-bg: #f4f4f2;
         }
 
         body { 
             background-color: var(--pakar-bg); 
-            font-family: Tahoma, Segoe UI, Arial, sans-serif; 
+            font-family: Tahoma, Geneva, sans-serif; 
             color: #333;
         }
 
-        .version-badge { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; color: #adb5bd; }
-        
         .header-section {
             text-align: center;
-            padding: 30px 0;
+            padding: 25px 0;
             background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-bottom: 3px solid var(--pakar-accent);
             margin-bottom: 20px;
         }
 
         .unit-logo {
-            width: 100px;
+            width: 120px;
             height: auto;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
-
-        .attribution {
-            font-size: 0.65rem;
-            color: #888;
-            margin-top: 8px;
-            line-height: 1.4;
-        }
-        .attribution a { color: #666; text-decoration: underline; }
 
         .contact-card { 
             background: white; 
-            border-radius: 18px; 
-            padding: 22px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06); 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
             height: 100%; 
-            border: 1px solid #eee;
-            transition: all 0.2s ease;
+            border: none;
         }
 
-        .name-header { font-size: 1.35rem; font-weight: bold; color: #222; margin-bottom: 5px; }
-        .info-sub { font-size: 0.95rem; color: #555; margin-bottom: 18px; min-height: 48px; line-height: 1.5; }
+        .name-header { font-size: 1.4rem; font-weight: bold; color: #000; margin-bottom: 5px; }
+        .info-sub { font-size: 1rem; color: #444; margin-bottom: 20px; line-height: 1.4; }
         
-        .btn-group-custom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .btn-group-custom { 
+            display: flex; 
+            gap: 8px; 
+            justify-content: center;
+        }
         
         .btn-custom { 
-            padding: 12px 4px; 
-            font-size: 0.85rem; 
-            border-radius: 12px; 
+            flex: 1;
+            padding: 10px 5px; 
+            font-size: 0.9rem; 
+            border-radius: 8px; 
             text-decoration: none; 
-            text-align: center; 
-            font-weight: 600; 
+            font-weight: bold; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; 
-            color: white !important; 
-            border: none;
-            transition: opacity 0.2s;
+            color: white !important;
         }
-        .btn-custom:hover { opacity: 0.85; }
+
+        .tel-btn { background-color: var(--pakar-accent); }
+        .wa-btn { background-color: #25D366; }
+        .vcf-btn { background-color: var(--pakar-main); }
         
-        /* צבעים חמים מהפלטה */
-        .tel-btn { background-color: var(--pakar-orange); }
-        .wa-btn { background-color: #25D366; } /* ירוק וואטסאפ סטנדרטי לזיהוי מהיר */
-        .vcf-btn { background-color: var(--pakar-brown); }
-        
-        .wa-icon { width: 20px; margin-bottom: 4px; }
+        .btn-icon { width: 22px; height: 22px; margin-bottom: 4px; }
 
         .search-container { 
             position: sticky; 
             top: 0; 
             background: var(--pakar-bg); 
             z-index: 1000; 
-            padding: 15px 0; 
-            margin-bottom: 20px;
+            padding: 15px 0;
         }
 
-        .form-control, .form-select {
-            border-radius: 12px;
-            border: 1px solid #ddd;
-            padding: 12px;
-        }
+        .form-control, .form-select { border-radius: 8px; padding: 10px; border: 1px solid #ccc; }
 
-        .share-app-btn {
-            background-color: white;
-            color: var(--pakar-orange) !important;
-            border: 2px solid var(--pakar-orange);
-            border-radius: 25px;
-            padding: 8px 25px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            transition: all 0.2s;
-        }
+        .version-badge { position: absolute; top: 5px; left: 10px; font-size: 0.7rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">גרסה: 1.2.1</div>
+<div class="version-badge">גרסה 1.2.2</div>
 
 <div class="header-section">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו פיקוד העורף" class="unit-logo">
-    <h2 class="m-0 font-weight-bold">אלפון יחידתי</h2>
-    <div class="attribution">
-        מאת <a href="//commons.wikimedia.org/wiki/User:%D7%A8%D7%95%D7%A0%D7%90%D7%9C%D7%93%D7%99%D7%A0%D7%99%D7%95_%D7%94%D7%9E%D7%9C%D7%9A">רונאלדיניו המלך</a> / <span>דובר צה"ל</span><br>
-        <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>
-    </div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
+    <h2 class="m-0">אלפון יחידתי</h2>
 </div>
 
-<div class="container text-center">
-    <button onclick="shareApp()" class="share-app-btn">🔗 שיתוף האלפון</button>
-
+<div class="container">
     <div class="search-container">
         <div class="row g-2">
             <div class="col-12">
-                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש שם או תפקיד..." onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -149,127 +113,98 @@
         </div>
     </div>
 
-    <div id="contactsGrid" class="row g-3 pb-5">
-        <div class="text-center mt-5">טוען נתונים...</div>
+    <div id="contactsGrid" class="row g-3 mt-2 pb-5">
+        <div class="text-center">טוען נתונים...</div>
     </div>
 </div>
 
 <script>
     let allContacts = [];
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Math.random();
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
 
     function normalize(str) {
-        if (!str) return "";
-        return str.toString().trim().replace(/["'״׳]/g, '');
+        return str ? str.toString().trim().replace(/["'״׳]/g, '') : "";
     }
 
     function loadData() {
-        fetch(csvUrl)
-            .then(response => response.text())
-            .then(csvText => {
-                Papa.parse(csvText, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: function(results) {
-                        allContacts = results.data.map(row => ({
-                            firstName: (row['firstName'] || '').trim(),
-                            lastName: (row['lastName'] || '').trim(),
-                            pluga: (row['pluga'] || '').trim(),
-                            framework: (row['framework'] || '').trim(),
-                            role: (row['role'] || '').trim(),
-                            mobile: (row['mobile'] || '').trim(),
-                            mobileWA: (row['mobileWA'] || '').trim()
-                        })).filter(c => c.firstName !== '');
-
-                        initFilters();
-                        renderContacts(allContacts);
-                    }
-                });
+        fetch(csvUrl).then(r => r.text()).then(txt => {
+            Papa.parse(txt, {
+                header: true,
+                complete: function(r) {
+                    allContacts = r.data.map(row => ({
+                        firstName: (row['firstName'] || '').trim(),
+                        lastName: (row['lastName'] || '').trim(),
+                        pluga: (row['pluga'] || '').trim(),
+                        framework: (row['framework'] || '').trim(),
+                        role: (row['role'] || '').trim(),
+                        mobile: (row['mobile'] || '').trim(),
+                        mobileWA: (row['mobileWA'] || '').trim()
+                    })).filter(c => c.firstName !== '');
+                    initFilters();
+                    renderContacts(allContacts);
+                }
             });
+        });
     }
 
     function initFilters() {
-        const pSelect = document.getElementById('companyFilter');
-        const uniquePlugot = [];
-        const seen = new Set();
-        
-        allContacts.forEach(c => {
-            const cleanP = normalize(c.pluga);
-            if (cleanP && !seen.has(cleanP)) {
-                seen.add(cleanP);
-                uniquePlugot.push(c.pluga);
-            }
-        });
-
-        pSelect.innerHTML = '<option value="">כל הפלוגות</option>';
-        uniquePlugot.sort().forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
-        updateFrameworkDropdown();
+        const pSel = document.getElementById('companyFilter');
+        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
+        pSel.innerHTML = '<option value="">כל הפלוגות</option>';
+        plugot.forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
+        updateFrameworks();
     }
 
-    function updateFrameworkDropdown() {
-        const selectedPluga = document.getElementById('companyFilter').value;
-        const fSelect = document.getElementById('unitFilter');
-        
-        const filtered = selectedPluga 
-            ? allContacts.filter(c => normalize(c.pluga) === normalize(selectedPluga))
-            : allContacts;
-            
-        const uniqueFrameworks = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
-        
-        fSelect.innerHTML = '<option value="">כל המסגרות</option>';
-        uniqueFrameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
+    function updateFrameworks() {
+        const p = document.getElementById('companyFilter').value;
+        const fSel = document.getElementById('unitFilter');
+        const filtered = p ? allContacts.filter(c => normalize(c.pluga) === normalize(p)) : allContacts;
+        const frames = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
+        fSel.innerHTML = '<option value="">כל המסגרות</option>';
+        frames.forEach(f => fSel.innerHTML += `<option value="${f}">${f}</option>`);
     }
 
-    function renderContacts(contacts) {
+    function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = contacts.length ? '' : '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
-        contacts.forEach(c => {
+        grid.innerHTML = list.length ? '' : '<div class="text-center">אין תוצאות</div>';
+        list.forEach(c => {
             grid.innerHTML += `
-                <div class="col-12 col-md-6 col-lg-4 text-end">
-                    <div class="contact-card shadow-sm">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="contact-card text-center">
                         <div class="name-header">${c.firstName} ${c.lastName}</div>
-                        <div class="info-sub">פלוגה: ${c.pluga}<br>מסגרת: ${c.framework}<br><strong>${c.role}</strong></div>
+                        <div class="info-sub">${c.pluga} • ${c.framework}<br><strong>${c.role}</strong></div>
                         <div class="btn-group-custom">
-                            <a href="tel:${c.mobile}" class="btn-custom tel-btn">📞 חיוג</a>
+                            <a href="tel:${c.mobile}" class="btn-custom tel-btn"><span>📞</span>חיוג</a>
                             <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom wa-btn">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/WhatsApp_Official_Image.png/600px-WhatsApp_Official_Image.png" class="wa-icon" alt="WA">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="btn-icon">
                                 WhatsApp
                             </a>
-                            <button onclick="downloadVCard('${c.firstName}','${c.lastName}','${c.mobile}','${c.pluga}','${c.role}')" class="btn-custom vcf-btn">👤 שמירה</button>
+                            <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}')" class="btn-custom vcf-btn"><span>👤</span>שמירה</button>
                         </div>
                     </div>
                 </div>`;
         });
     }
 
-    function filterContacts(isPlugaChange = false) {
+    function filterContacts(pChange = false) {
+        if (pChange) updateFrameworks();
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const selectedPluga = document.getElementById('companyFilter').value;
-        if (isPlugaChange) updateFrameworkDropdown();
-        const selectedFrame = document.getElementById('unitFilter').value;
-
-        const filtered = allContacts.filter(c => {
-            const searchStr = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase();
-            return searchStr.includes(term) && 
-                   (!selectedPluga || normalize(c.pluga) === normalize(selectedPluga)) && 
-                   (!selectedFrame || normalize(c.framework) === normalize(selectedFrame));
+        const p = document.getElementById('companyFilter').value;
+        const f = document.getElementById('unitFilter').value;
+        const res = allContacts.filter(c => {
+            const matchSearch = `${c.firstName} ${c.lastName} ${c.role}`.toLowerCase().includes(term);
+            const matchP = !p || normalize(c.pluga) === normalize(p);
+            const matchF = !f || normalize(c.framework) === normalize(f);
+            return matchSearch && matchP && matchF;
         });
-        renderContacts(filtered);
+        renderContacts(res);
     }
 
-    function shareApp() {
-        if (navigator.share) {
-            navigator.share({ title: 'אלפון יחידתי - פקע"ר', url: window.location.href });
-        } else {
-            alert("העתק את כתובת האתר ושלח!");
-        }
-    }
-
-    function downloadVCard(f, l, p, o, t) {
-        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${f} ${l}\nN;CHARSET=UTF-8:${l};${f};;;\nTEL;TYPE=CELL:${p}\nORG;CHARSET=UTF-8:${o}\nTITLE;CHARSET=UTF-8:${t}\nEND:VCARD`;
-        const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+    function saveVCard(f, l, p) {
+        const v = `BEGIN:VCARD\nVERSION:3.0\nFN:${f} ${l}\nTEL:${p}\nEND:VCARD`;
+        const b = new Blob([v], {type:'text/vcard'});
         const a = document.createElement('a');
-        a.href = window.URL.createObjectURL(blob);
+        a.href = URL.createObjectURL(b);
         a.download = `${f}_${l}.vcf`;
         a.click();
     }
