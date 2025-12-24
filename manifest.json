@@ -1,20 +1,276 @@
-{
-  "name": "אלפון גדוד 882",
-  "short_name": "אלפון 882",
-  "start_url": "/alfon/",
-  "display": "standalone",
-  "background_color": "#f8f9fa",
-  "theme_color": "#7c4535",
-  "icons": [
-    {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/192px-Pakar.svg.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/512px-Pakar.svg.png",
-      "sizes": "512x512",
-      "type": "image/png"
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אלפון גדוד 882</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#7c4535">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/192px-Pakar.svg.png">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    
+    <style>
+        :root {
+            --pakar-main: #7c4535; 
+            --pakar-accent: #d14a24; 
+            --pakar-bg: #f8f9fa;
+        }
+
+        body { background-color: var(--pakar-bg); font-family: Tahoma, Geneva, sans-serif; margin: 0; padding: 0; }
+        
+        .header-section { 
+            text-align: center; padding: 10px 0; background: white; 
+            border-bottom: 2px solid var(--pakar-accent); 
+        }
+        .unit-logo { width: 45px; height: auto; margin-bottom: 3px; }
+        .header-section h4 { font-size: 1.1rem; margin: 0; font-weight: bold; }
+
+        .search-container { 
+            position: sticky; top: 0; background: var(--pakar-bg); 
+            z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+
+        .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
+        .contact-col { flex: 0 0 50%; max-width: 50%; padding: 4px; }
+
+        @media (min-width: 992px) {
+            .contact-col { flex: 0 0 25%; max-width: 25%; }
+            .container-fluid { max-width: 1200px; margin: 0 auto; }
+        }
+
+        .contact-card { 
+            background: white; border-radius: 12px; padding: 15px 8px; 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1); height: 100%; 
+            display: flex; flex-direction: column; justify-content: space-between; text-align: center; 
+        }
+
+        .name-header { font-size: 1.1rem; font-weight: bold; color: #000; margin-bottom: 2px; }
+        .info-sub { font-size: 0.85rem; color: #666; margin-bottom: 12px; line-height: 1.3; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        
+        /* עיצוב הלחצנים מחדש */
+        .btn-group-custom { 
+            display: flex; justify-content: space-around; align-items: center; width: 100%;
+        }
+        .btn-custom { 
+            background: none; border: none; display: flex; flex-direction: column; 
+            align-items: center; color: #333 !important; text-decoration: none; padding: 5px; flex: 1;
+        }
+        .btn-label { font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
+        .btn-icon-img { width: 32px; height: 32px; object-fit: contain; }
+
+        .action-btn { 
+            background-color: white; border: 1px solid #ccc; border-radius: 8px; 
+            padding: 8px 5px; font-size: 0.8rem; font-weight: bold; 
+            color: var(--pakar-main); height: 100%; display: flex; align-items: center; justify-content: center; 
+        }
+
+        .install-banner { 
+            display: none; background: #ffeb3b; padding: 12px; 
+            text-align: center; border-bottom: 2px solid #fbc02d; font-size: 0.95rem; font-weight: bold;
+        }
+        
+        .form-select, .form-control { font-size: 0.9rem; padding: 10px; border-radius: 8px; }
+        .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.6rem; color: #bbb; }
+    </style>
+</head>
+<body>
+
+<div id="installBanner" class="install-banner">
+    רוצה גישה מהירה? התקן את האלפון כאפליקציה
+    <button onclick="installPWA()" class="btn btn-dark btn-sm ms-3">התקן עכשיו</button>
+</div>
+
+<div class="version-badge">1.2.37</div>
+
+<div class="header-section">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
+    <h4>גדוד 882 - אלפון יחידתי</h4>
+</div>
+
+<div class="container-fluid">
+    <div class="search-container">
+        <div class="row g-2 align-items-stretch">
+            <div class="col-6">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." oninput="debouncedSearch()">
+            </div>
+            <div class="col-3">
+                <button onclick="resetAll()" class="action-btn w-100">✖ נקה</button>
+            </div>
+            <div class="col-3">
+                <button onclick="loadData(true)" class="action-btn w-100">🔄 רענן</button>
+            </div>
+            <div class="col-6">
+                <select id="companyFilter" class="form-select" onchange="handleCompanyChange()">
+                    <option value="">כל הפלוגות</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <select id="unitFilter" class="form-select" onchange="filterContacts()" disabled>
+                    <option value="">כל המסגרות</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="contactsGrid" class="contacts-grid pb-5">
+        <div class="text-center w-100 mt-4">טוען נתונים...</div>
+    </div>
+</div>
+
+<script>
+    let allContacts = [];
+    let searchTimeout;
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBanner').style.display = 'block';
+    });
+
+    async function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') document.getElementById('installBanner').style.display = 'none';
+        deferredPrompt = null;
     }
-  ]
-}
+
+    const getCsvUrl = () => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
+
+    function loadData(isRefresh = false) {
+        if(isRefresh) document.getElementById('contactsGrid').innerHTML = '<div class="text-center w-100 mt-4">מרענן...</div>';
+        fetch(getCsvUrl()).then(r => r.text()).then(txt => {
+            Papa.parse(txt, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(r) {
+                    allContacts = r.data.map(row => ({
+                        name: `${(row['firstName'] || '')} ${(row['lastName'] || '')}`.trim(),
+                        pluga: (row['pluga'] || '').trim(),
+                        framework: (row['framework'] || '').trim(),
+                        role: (row['role'] || '').trim(),
+                        mobile: (row['mobile'] || '').trim(),
+                        mobileWA: (row['mobileWA'] || '').trim(),
+                        searchKey: `${row['firstName']} ${row['lastName']} ${row['role']} ${row['pluga']} ${row['framework']}`.toLowerCase()
+                    })).filter(c => c.name !== '');
+                    updateDropdowns(allContacts, true, true);
+                    renderContacts(allContacts);
+                }
+            });
+        });
+    }
+
+    function debouncedSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            updateDropdowns(getFilteredList(), true, false);
+            filterContacts();
+        }, 250);
+    }
+
+    function getFilteredList() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        return term ? allContacts.filter(c => c.searchKey.includes(term)) : allContacts;
+    }
+
+    function updateDropdowns(list, updatePluga, updateFrame) {
+        if (updatePluga) {
+            const pSel = document.getElementById('companyFilter');
+            const current = pSel.value;
+            const plugot = [...new Set(list.map(c => c.pluga))].filter(Boolean).sort();
+            let html = '<option value="">כל הפלוגות</option>';
+            plugot.forEach(p => html += `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`);
+            pSel.innerHTML = html;
+        }
+        const pVal = document.getElementById('companyFilter').value;
+        const fSel = document.getElementById('unitFilter');
+        if (pVal) {
+            fSel.disabled = false;
+            const frames = [...new Set(list.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
+            let fHtml = '<option value="">כל המסגרות</option>';
+            frames.forEach(f => fHtml += `<option value="${f}">${f}</option>`);
+            fSel.innerHTML = fHtml;
+        } else {
+            fSel.disabled = true;
+            fSel.innerHTML = '<option value="">כל המסגרות</option>';
+        }
+    }
+
+    function handleCompanyChange() {
+        updateDropdowns(getFilteredList(), false, true);
+        filterContacts();
+    }
+
+    function filterContacts() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const p = document.getElementById('companyFilter').value;
+        const f = document.getElementById('unitFilter').value;
+        const res = allContacts.filter(c => {
+            const mSearch = !term || c.searchKey.includes(term);
+            const mP = !p || c.pluga === p;
+            const mF = !f || c.framework === f;
+            return mSearch && mP && mF;
+        });
+        renderContacts(res);
+    }
+
+    function resetAll() {
+        document.getElementById('searchInput').value = "";
+        document.getElementById('companyFilter').value = "";
+        document.getElementById('unitFilter').value = "";
+        document.getElementById('unitFilter').disabled = true;
+        updateDropdowns(allContacts, true, true);
+        renderContacts(allContacts);
+    }
+
+    function renderContacts(list) {
+        const grid = document.getElementById('contactsGrid');
+        if (!list.length) { grid.innerHTML = '<div class="text-center w-100 mt-4">אין תוצאות</div>'; return; }
+        const html = list.map(c => `
+            <div class="contact-col">
+                <div class="contact-card">
+                    <div>
+                        <div class="name-header">${c.name}</div>
+                        <div class="info-sub">${c.pluga} • ${c.framework}<br>${c.role}</div>
+                    </div>
+                    <div class="btn-group-custom">
+                        <button onclick="saveVCard('${c.name}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="btn-custom">
+                            <img src="contact.png" class="btn-icon-img" alt="שמירה">
+                            <span class="btn-label">שמירה</span>
+                        </button>
+                        <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom">
+                            <img src="whatsapp.png" class="btn-icon-img" alt="הודעה">
+                            <span class="btn-label">הודעה</span>
+                        </a>
+                        <a href="tel:${c.mobile}" class="btn-custom">
+                            <img src="phone-call.png" class="btn-icon-img" alt="חייג">
+                            <span class="btn-label">חייג</span>
+                        </a>
+                    </div>
+                </div>
+            </div>`).join('');
+        grid.innerHTML = html;
+    }
+
+    function saveVCard(name, phone, pluga, frame, role) {
+        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${name}\nTEL;TYPE=CELL:${phone}\nORG;CHARSET=UTF-8:${pluga} - ${frame}\nTITLE;CHARSET=UTF-8:${role}\nEND:VCARD`;
+        const blob = new Blob([vcard], {type:'text/vcard;charset=utf-8'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${name.replace(/\s+/g, '_')}.vcf`;
+        a.click();
+    }
+
+    loadData();
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9PiBlLnJlc3BvbmRXaXRoKGZldGNoKGUucmVxdWVzdCkpKTs=');
+    }
+</script>
+</body>
+</html>
