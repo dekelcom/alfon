@@ -44,32 +44,36 @@
         }
 
         .contact-card { 
-            background: white; border-radius: 12px; padding: 15px 8px; 
+            background: white; border-radius: 12px; padding: 15px 5px; 
             box-shadow: 0 1px 4px rgba(0,0,0,0.1); height: 100%; 
             display: flex; flex-direction: column; justify-content: space-between; text-align: center; 
         }
 
-        .name-header { font-size: 1.1rem; font-weight: bold; color: #000; margin-bottom: 2px; }
-        .info-sub { font-size: 0.85rem; color: #666; margin-bottom: 12px; line-height: 1.3; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .name-header { font-size: 1rem; font-weight: bold; color: #000; margin-bottom: 2px; }
+        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.2; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         
-        /* עיצוב הלחצנים בשורה אחת */
+        /* תיקון קריטי ללחצנים - שורה אחת תמיד */
         .btn-group-custom { 
-            display: flex; justify-content: space-around; align-items: center; width: 100%;
+            display: flex !important; 
+            flex-direction: row !important; 
+            justify-content: space-around !important; 
+            align-items: center !important; 
+            width: 100%;
+            gap: 2px;
         }
         .btn-custom { 
             background: none; border: none; display: flex; flex-direction: column; 
-            align-items: center; color: #333 !important; text-decoration: none; padding: 5px; flex: 1;
+            align-items: center; color: #333 !important; text-decoration: none; padding: 2px; flex: 1;
         }
-        .btn-label { font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
-        .btn-icon-img { width: 32px; height: 32px; object-fit: contain; }
+        .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; white-space: nowrap; }
+        .btn-icon-img { width: 28px; height: 28px; object-fit: contain; }
 
         .action-btn { 
             background-color: white; border: 1px solid #ccc; border-radius: 8px; 
-            padding: 8px 5px; font-size: 0.8rem; font-weight: bold; 
+            padding: 8px 2px; font-size: 0.75rem; font-weight: bold; 
             color: var(--pakar-main); height: 100%; display: flex; align-items: center; justify-content: center; 
         }
 
-        /* באנרים להתקנה */
         .install-banner { 
             display: none; background: #ffeb3b; padding: 12px; 
             text-align: center; border-bottom: 2px solid #fbc02d; font-size: 0.95rem; font-weight: bold;
@@ -80,22 +84,22 @@
         }
         .ios-icon { width: 20px; vertical-align: middle; margin: 0 3px; }
         
-        .form-select, .form-control { font-size: 0.9rem; padding: 10px; border-radius: 8px; }
+        .form-select, .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.6rem; color: #bbb; }
     </style>
 </head>
 <body>
 
 <div id="installBanner" class="install-banner">
-    רוצה גישה מהירה? התקן את האלפון כאפליקציה
-    <button onclick="installPWA()" class="btn btn-dark btn-sm ms-3">התקן עכשיו</button>
+    התקן את האלפון כאפליקציה
+    <button onclick="installPWA()" class="btn btn-dark btn-sm ms-3">התקן</button>
 </div>
 
 <div id="iosBanner" class="ios-instruction">
-    משתמש אייפון? לחץ על <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23007aff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'/%3E%3Cpolyline points='16 6 12 2 8 6'/%3E%3Cline x1='12' y1='2' x2='12' y2='15'/%3E%3C/svg%3E" class="ios-icon"> ואז <b>"הוסף למסך הבית"</b> להתקנה.
+    באייפון: לחץ על <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23007aff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'/%3E%3Cpolyline points='16 6 12 2 8 6'/%3E%3Cline x1='12' y1='2' x2='12' y2='15'/%3E%3C/svg%3E" class="ios-icon"> ואז <b>"הוסף למסך הבית"</b>.
 </div>
 
-<div class="version-badge">1.2.38</div>
+<div class="version-badge">1.2.39</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -104,9 +108,9 @@
 
 <div class="container-fluid">
     <div class="search-container">
-        <div class="row g-2 align-items-stretch">
+        <div class="row g-1 align-items-stretch">
             <div class="col-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." oninput="debouncedSearch()">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש..." oninput="debouncedSearch()">
             </div>
             <div class="col-3">
                 <button onclick="resetAll()" class="action-btn w-100">✖ נקה</button>
@@ -114,12 +118,12 @@
             <div class="col-3">
                 <button onclick="loadData(true)" class="action-btn w-100">🔄 רענן</button>
             </div>
-            <div class="col-6">
+            <div class="col-6 mt-1">
                 <select id="companyFilter" class="form-select" onchange="handleCompanyChange()">
                     <option value="">כל הפלוגות</option>
                 </select>
             </div>
-            <div class="col-6">
+            <div class="col-6 mt-1">
                 <select id="unitFilter" class="form-select" onchange="filterContacts()" disabled>
                     <option value="">כל המסגרות</option>
                 </select>
@@ -128,7 +132,7 @@
     </div>
 
     <div id="contactsGrid" class="contacts-grid pb-5">
-        <div class="text-center w-100 mt-4">טוען נתונים...</div>
+        <div class="text-center w-100 mt-4">טוען...</div>
     </div>
 </div>
 
@@ -137,7 +141,6 @@
     let searchTimeout;
     let deferredPrompt;
 
-    // זיהוי מכשיר והצגת באנרים מתאימים
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -147,9 +150,7 @@
     window.addEventListener('load', () => {
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        if (isIOS && !isStandalone) {
-            document.getElementById('iosBanner').style.display = 'block';
-        }
+        if (isIOS && !isStandalone) document.getElementById('iosBanner').style.display = 'block';
     });
 
     async function installPWA() {
@@ -166,8 +167,7 @@
         if(isRefresh) document.getElementById('contactsGrid').innerHTML = '<div class="text-center w-100 mt-4">מרענן...</div>';
         fetch(getCsvUrl()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
-                header: true,
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: function(r) {
                     allContacts = r.data.map(row => ({
                         name: `${(row['firstName'] || '')} ${(row['lastName'] || '')}`.trim(),
@@ -216,8 +216,7 @@
             frames.forEach(f => fHtml += `<option value="${f}">${f}</option>`);
             fSel.innerHTML = fHtml;
         } else {
-            fSel.disabled = true;
-            fSel.innerHTML = '<option value="">כל המסגרות</option>';
+            fSel.disabled = true; fSel.innerHTML = '<option value="">כל המסגרות</option>';
         }
     }
 
