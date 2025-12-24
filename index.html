@@ -8,7 +8,6 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#7c4535">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/192px-Pakar.svg.png">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -24,113 +23,104 @@
         body { background-color: var(--pakar-bg); font-family: Tahoma, Geneva, sans-serif; margin: 0; padding: 0; }
         
         .header-section { 
-            text-align: center; padding: 10px 0; background: white; 
+            text-align: center; padding: 8px 0; background: white; 
             border-bottom: 2px solid var(--pakar-accent); 
         }
-        .unit-logo { width: 45px; height: auto; margin-bottom: 3px; }
-        .header-section h4 { font-size: 1.1rem; margin: 0; font-weight: bold; }
+        .unit-logo { width: 40px; height: auto; }
+        .header-section h4 { font-size: 1rem; margin: 0; font-weight: bold; }
 
+        /* תיקון אזור החיפוש והלחצנים למעלה */
         .search-container { 
             position: sticky; top: 0; background: var(--pakar-bg); 
             z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
         }
 
-        .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
+        .search-row-top { display: flex; gap: 5px; margin-bottom: 8px; }
+        .search-row-bottom { display: flex; gap: 5px; }
+
+        .form-control, .form-select { 
+            font-size: 0.85rem !important; padding: 8px !important; border-radius: 8px !important;
+        }
+
+        .action-btn { 
+            background-color: white; border: 1px solid #ccc; border-radius: 8px; 
+            font-size: 0.75rem; font-weight: bold; color: var(--pakar-main);
+            display: flex; align-items: center; justify-content: center;
+            white-space: nowrap; padding: 0 10px; min-width: 60px;
+        }
+
+        /* תיקון כרטיסי אנשי הקשר */
+        .contacts-grid { display: flex; flex-wrap: wrap; padding: 4px; }
         .contact-col { flex: 0 0 50%; max-width: 50%; padding: 4px; }
 
         @media (min-width: 992px) {
             .contact-col { flex: 0 0 25%; max-width: 25%; }
-            .container-fluid { max-width: 1200px; margin: 0 auto; }
         }
 
         .contact-card { 
-            background: white; border-radius: 12px; padding: 15px 5px; 
+            background: white; border-radius: 12px; padding: 12px 5px; 
             box-shadow: 0 1px 4px rgba(0,0,0,0.1); height: 100%; 
             display: flex; flex-direction: column; justify-content: space-between; text-align: center; 
         }
 
-        .name-header { font-size: 1rem; font-weight: bold; color: #000; margin-bottom: 2px; }
-        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.2; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        .name-header { font-size: 0.95rem; font-weight: bold; color: #000; margin-bottom: 2px; }
+        .info-sub { font-size: 0.75rem; color: #666; margin-bottom: 8px; line-height: 1.2; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         
-        /* תיקון קריטי ללחצנים - שורה אחת תמיד */
+        /* לחצנים בתוך הכרטיס - תמיד בשורה אחת */
         .btn-group-custom { 
-            display: flex !important; 
-            flex-direction: row !important; 
-            justify-content: space-around !important; 
-            align-items: center !important; 
-            width: 100%;
-            gap: 2px;
+            display: flex !important; flex-direction: row !important; 
+            justify-content: space-around !important; width: 100%;
         }
         .btn-custom { 
-            background: none; border: none; display: flex; flex-direction: column; 
-            align-items: center; color: #333 !important; text-decoration: none; padding: 2px; flex: 1;
+            display: flex; flex-direction: column; align-items: center; 
+            color: #333 !important; text-decoration: none; flex: 1;
         }
-        .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; white-space: nowrap; }
-        .btn-icon-img { width: 28px; height: 28px; object-fit: contain; }
+        .btn-label { font-size: 0.6rem; font-weight: bold; margin-top: 3px; }
+        .btn-icon-img { width: 26px; height: 26px; object-fit: contain; }
 
-        .action-btn { 
-            background-color: white; border: 1px solid #ccc; border-radius: 8px; 
-            padding: 8px 2px; font-size: 0.75rem; font-weight: bold; 
-            color: var(--pakar-main); height: 100%; display: flex; align-items: center; justify-content: center; 
+        .install-banner, .ios-instruction { 
+            display: none; padding: 10px; text-align: center; font-size: 0.85rem; font-weight: bold;
         }
-
-        .install-banner { 
-            display: none; background: #ffeb3b; padding: 12px; 
-            text-align: center; border-bottom: 2px solid #fbc02d; font-size: 0.95rem; font-weight: bold;
-        }
-        .ios-instruction {
-            display: none; background: #e1f5fe; padding: 12px;
-            text-align: center; border-bottom: 2px solid #03a9f4; font-size: 0.85rem;
-        }
-        .ios-icon { width: 20px; vertical-align: middle; margin: 0 3px; }
+        .install-banner { background: #ffeb3b; border-bottom: 2px solid #fbc02d; }
+        .ios-instruction { background: #e1f5fe; border-bottom: 2px solid #03a9f4; }
         
-        .form-select, .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
-        .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.6rem; color: #bbb; }
+        .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #bbb; }
     </style>
 </head>
 <body>
 
 <div id="installBanner" class="install-banner">
-    התקן את האלפון כאפליקציה
-    <button onclick="installPWA()" class="btn btn-dark btn-sm ms-3">התקן</button>
+    התקן אפליקציה <button onclick="installPWA()" class="btn btn-dark btn-sm ms-2">התקן</button>
 </div>
 
 <div id="iosBanner" class="ios-instruction">
-    באייפון: לחץ על <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23007aff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'/%3E%3Cpolyline points='16 6 12 2 8 6'/%3E%3Cline x1='12' y1='2' x2='12' y2='15'/%3E%3C/svg%3E" class="ios-icon"> ואז <b>"הוסף למסך הבית"</b>.
+    אייפון: לחץ שיתוף ואז <b>"הוסף למסך הבית"</b>
 </div>
 
-<div class="version-badge">1.2.39</div>
+<div class="version-badge">1.2.40</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
     <h4>גדוד 882 - אלפון יחידתי</h4>
 </div>
 
-<div class="container-fluid">
-    <div class="search-container">
-        <div class="row g-1 align-items-stretch">
-            <div class="col-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש..." oninput="debouncedSearch()">
-            </div>
-            <div class="col-3">
-                <button onclick="resetAll()" class="action-btn w-100">✖ נקה</button>
-            </div>
-            <div class="col-3">
-                <button onclick="loadData(true)" class="action-btn w-100">🔄 רענן</button>
-            </div>
-            <div class="col-6 mt-1">
-                <select id="companyFilter" class="form-select" onchange="handleCompanyChange()">
-                    <option value="">כל הפלוגות</option>
-                </select>
-            </div>
-            <div class="col-6 mt-1">
-                <select id="unitFilter" class="form-select" onchange="filterContacts()" disabled>
-                    <option value="">כל המסגרות</option>
-                </select>
-            </div>
-        </div>
+<div class="search-container">
+    <div class="search-row-top">
+        <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." oninput="debouncedSearch()" style="flex: 2;">
+        <button onclick="resetAll()" class="action-btn">✖ נקה</button>
+        <button onclick="loadData(true)" class="action-btn">🔄</button>
     </div>
+    <div class="search-row-bottom">
+        <select id="companyFilter" class="form-select" onchange="handleCompanyChange()" style="flex: 1;">
+            <option value="">כל הפלוגות</option>
+        </select>
+        <select id="unitFilter" class="form-select" onchange="filterContacts()" disabled style="flex: 1;">
+            <option value="">כל המסגרות</option>
+        </select>
+    </div>
+</div>
 
+<div class="container-fluid">
     <div id="contactsGrid" class="contacts-grid pb-5">
         <div class="text-center w-100 mt-4">טוען...</div>
     </div>
