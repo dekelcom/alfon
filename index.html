@@ -6,28 +6,29 @@
     <title>אלפון יחידתי</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: system-ui, -apple-system, sans-serif; }
-        .contact-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); height: 100%; transition: transform 0.2s; }
-        .contact-card:hover { transform: translateY(-3px); }
-        .name-header { font-size: 1.25rem; font-weight: bold; margin-bottom: 2px; color: #212529; }
-        .info-sub { font-size: 0.9rem; color: #6c757d; margin-bottom: 12px; }
-        .btn-group-custom { display: flex; gap: 8px; justify-content: center; }
-        .btn-custom { flex: 1; padding: 8px 5px; font-size: 0.85rem; border-radius: 8px; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .search-container { position: sticky; top: 0; background: #f8f9fa; z-index: 1000; padding: 15px 0; }
-        .vcf-btn { background-color: #6c757d; color: white; border: none; }
-        .wa-btn { background-color: #25D366; color: white; border: none; }
-        .tel-btn { background-color: #007bff; color: white; border: none; }
+        body { background-color: #f0f2f5; font-family: system-ui, -apple-system, sans-serif; }
+        .contact-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; border: none; }
+        .name-header { font-size: 1.3rem; font-weight: 800; color: #1c1e21; margin-bottom: 4px; }
+        .info-sub { font-size: 0.95rem; color: #65676b; margin-bottom: 15px; line-height: 1.4; }
+        .btn-group-custom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .btn-custom { padding: 10px 2px; font-size: 0.85rem; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.2s; }
+        .btn-custom:hover { opacity: 0.8; color: white; }
+        .search-container { position: sticky; top: 0; background: #f0f2f5; z-index: 1000; padding: 15px 0; border-bottom: 1px solid #ddd; }
+        .vcf-btn { background-color: #6c757d; color: white; }
+        .wa-btn { background-color: #25D366; color: white; }
+        .tel-btn { background-color: #007bff; color: white; }
+        .icon-text { font-size: 1.2rem; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
-<div class="container mt-3">
-    <h2 class="text-center mb-4">אלפון יחידתי</h2>
+<div class="container mt-2">
+    <h2 class="text-center mb-4 font-weight-bold">אלפון יחידתי</h2>
     
     <div class="search-container">
         <div class="row g-2">
             <div class="col-12">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי (שם, תפקיד...)" onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש שם, תפקיד או פלוגה..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts()">
@@ -42,8 +43,8 @@
         </div>
     </div>
 
-    <div id="contactsGrid" class="row g-3 mt-2">
-        <div class="text-center mt-5">טוען נתונים...</div>
+    <div id="contactsGrid" class="row g-3 mt-2 pb-5">
+        <div class="text-center mt-5">טוען נתונים מהאלפון...</div>
     </div>
 </div>
 
@@ -55,9 +56,20 @@
     async function loadData() {
         Papa.parse(csvUrl, {
             download: true,
-            header: true,
+            header: true, // משתמש בכותרות שראיתי בתמונה שלך
+            skipEmptyLines: true,
             complete: function(results) {
-                allContacts = results.data.filter(r => r['שם פרטי']); // סינון שורות ריקות
+                // המרה של שמות העמודות מהתמונה שלך למבנה פנימי
+                allContacts = results.data.map(row => ({
+                    firstName: row['firstName'],
+                    lastName: row['lastName'],
+                    pluga: row['pluga'],
+                    framework: row['framework'],
+                    role: row['role'],
+                    mobile: row['mobile'],
+                    mobileWA: row['mobileWA'] // משתמש בעמודה המוכנה לוואטסאפ
+                })).filter(c => c.firstName);
+
                 populateFilters();
                 renderContacts(allContacts);
             }
@@ -65,30 +77,36 @@
     }
 
     function populateFilters() {
-        const companies = [...new Set(allContacts.map(c => c['פלוגה']))].sort();
-        const units = [...new Set(allContacts.map(c => c['מסגרת']))].sort();
+        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
+        const frameworks = [...new Set(allContacts.map(c => c.framework))].filter(Boolean).sort();
         
-        const cSelect = document.getElementById('companyFilter');
-        companies.forEach(c => cSelect.innerHTML += `<option value="${c}">${c}</option>`);
+        const pSelect = document.getElementById('companyFilter');
+        plugot.forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
         
-        const uSelect = document.getElementById('unitFilter');
-        units.forEach(u => uSelect.innerHTML += `<option value="${u}">${u}</option>`);
+        const fSelect = document.getElementById('unitFilter');
+        frameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
     }
 
     function renderContacts(contacts) {
         const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = '';
+        grid.innerHTML = contacts.length ? '' : '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
         
         contacts.forEach(c => {
             const card = `
                 <div class="col-12 col-md-6 col-lg-4">
-                    <div class="contact-card text-center">
-                        <div class="name-header">${c['שם פרטי']} ${c['שם משפחה']}</div>
-                        <div class="info-sub">${c['פלוגה']} - ${c['מסגרת']} - ${c['תפקיד']}</div>
+                    <div class="contact-card text-center shadow-sm">
+                        <div class="name-header">${c.firstName} ${c.lastName}</div>
+                        <div class="info-sub">${c.pluga} • ${c.framework}<br><strong>${c.role}</strong></div>
                         <div class="btn-group-custom">
-                            <a href="tel:${c['מספר טלפון']}" class="btn-custom tel-btn">📞 חיוג</a>
-                            <a href="https://wa.me/972${c['מספר טלפון']?.replace(/^0/, '')}" target="_blank" class="btn-custom wa-btn">💬 הודעה</a>
-                            <button onclick="downloadVCard('${c['שם פרטי']}', '${c['שם משפחה']}', '${c['מספר טלפון']}', '${c['פלוגה']}', '${c['תפקיד']}')" class="btn-custom vcf-btn">💾 שמירה</button>
+                            <a href="tel:${c.mobile}" class="btn-custom tel-btn">
+                                <span class="icon-text">📞</span>חיוג
+                            </a>
+                            <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom wa-btn">
+                                <span class="icon-text">💬</span>WhatsApp
+                            </a>
+                            <button onclick="downloadVCard('${c.firstName}', '${c.lastName}', '${c.mobile}', '${c.pluga}', '${c.role}')" class="btn-custom vcf-btn">
+                                <span class="icon-text">👤</span>שמירה
+                            </button>
                         </div>
                     </div>
                 </div>`;
@@ -98,24 +116,34 @@
 
     function filterContacts() {
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const comp = document.getElementById('companyFilter').value;
-        const unit = document.getElementById('unitFilter').value;
+        const pluga = document.getElementById('companyFilter').value;
+        const frame = document.getElementById('unitFilter').value;
 
         const filtered = allContacts.filter(c => {
-            const matchText = Object.values(c).join(' ').toLowerCase().includes(term);
-            const matchComp = comp === "" || c['פלוגה'] === comp;
-            const matchUnit = unit === "" || c['מסגרת'] === unit;
-            return matchText && matchComp && matchUnit;
+            const searchStr = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga}`.toLowerCase();
+            return searchStr.includes(term) && 
+                   (pluga === "" || c.pluga === pluga) && 
+                   (frame === "" || c.framework === frame);
         });
         renderContacts(filtered);
     }
 
     function downloadVCard(fName, lName, phone, org, title) {
-        const vcard = `BEGIN:VCARD\nVERSION:4.0\nFN:${fName} ${lName}\nN:${lName};${fName};;;\nTEL;TYPE=cell:${phone}\nORG:${org}\nTITLE:${title}\nEND:VCARD`;
-        const blob = new Blob([vcard], { type: 'text/vcard' });
-        const url = window.URL.createObjectURL(blob);
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN;CHARSET=UTF-8:${fName} ${lName}`,
+            `N;CHARSET=UTF-8:${lName};${fName};;;`,
+            `TEL;TYPE=CELL:${phone}`,
+            `ORG;CHARSET=UTF-8:${org}`,
+            `TITLE;CHARSET=UTF-8:${title}`,
+            'REV:' + new Date().toISOString(),
+            'END:VCARD'
+        ].join('\n');
+
+        const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
         const a = document.createElement('a');
-        a.href = url;
+        a.href = window.URL.createObjectURL(blob);
         a.download = `${fName}_${lName}.vcf`;
         a.click();
     }
