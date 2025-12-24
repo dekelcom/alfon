@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>גדוד 882 - אלפון יחידתי</title>
+    <title>גדוד 882 - אלפון</title>
     
+    <meta name="theme-color" content="#7c4535">
+    <link rel="manifest" href="data:application/json;base64,ewogICJ2ZXJzaW9uIjogIjEuMi4zNSIsCiAgIm5hbWUiOiAiZ2R1ZCA4ODIiLAogICJzaG9ydF9uYW1lIjogIjA4ODIiLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2Y4ZjlmYSIsCiAgInRoZW1lX2NvbG9yIjogIiM3YzQ1MzUiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3VwbG9hZC53aWtpbWVkaWEub3JnL3dpa2lwZWRpYS9jb21tb25zL3RodW1iL2EvYTkvUGFrYXIuc3ZnLzUxMnB4LVBha2FyLnN2Zy5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0=">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
@@ -15,29 +18,12 @@
             --pakar-bg: #f8f9fa;
         }
 
-        body { 
-            background-color: var(--pakar-bg); 
-            font-family: Tahoma, Geneva, sans-serif; 
-            margin: 0; padding: 0;
-        }
-
-        .header-section {
-            text-align: center;
-            padding: 10px 0;
-            background: white;
-            border-bottom: 2px solid var(--pakar-accent);
-        }
-
+        body { background-color: var(--pakar-bg); font-family: Tahoma, Geneva, sans-serif; margin: 0; padding: 0; }
+        .header-section { text-align: center; padding: 10px 0; background: white; border-bottom: 2px solid var(--pakar-accent); }
         .unit-logo { width: 45px; height: auto; margin-bottom: 3px; }
         .header-section h4 { font-size: 1.1rem; margin: 0; font-weight: bold; }
 
-        .search-container { 
-            position: sticky; top: 0; 
-            background: var(--pakar-bg); 
-            z-index: 1000; padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
+        .search-container { position: sticky; top: 0; background: var(--pakar-bg); z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
         .contact-col { flex: 0 0 50%; max-width: 50%; padding: 4px; }
 
@@ -46,55 +32,31 @@
             .container-fluid { max-width: 1200px; margin: 0 auto; }
         }
 
-        .contact-card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 12px 6px; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-            height: 100%; 
-            display: flex; flex-direction: column; justify-content: space-between;
-            text-align: center;
-        }
-
+        .contact-card { background: white; border-radius: 12px; padding: 12px 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); height: 100%; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
         .name-header { font-size: 0.95rem; font-weight: bold; color: #000; margin-bottom: 2px; }
         .info-sub { font-size: 0.75rem; color: #666; margin-bottom: 10px; line-height: 1.2; }
         
-        .btn-group-custom { 
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
-            border-top: 1px solid #f0f0f0; padding-top: 10px;
-        }
-        
-        .btn-custom { 
-            background: none; border: none;
-            display: flex; flex-direction: column; align-items: center; 
-            color: #333 !important; text-decoration: none; padding: 0;
-        }
-
+        .btn-group-custom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+        .btn-custom { background: none; border: none; display: flex; flex-direction: column; align-items: center; color: #333 !important; text-decoration: none; padding: 0; }
         .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; }
         .btn-icon-img { width: 24px; height: 24px; object-fit: contain; }
 
-        .action-btn {
-            background-color: white; border: 1px solid #ccc; border-radius: 8px;
-            padding: 8px 5px; font-size: 0.75rem; font-weight: bold;
-            color: var(--pakar-main); height: 100%; display: flex;
-            align-items: center; justify-content: center;
-        }
-
-        .form-select { 
-            font-size: 0.85rem; padding: 8px 10px 8px 30px !important; 
-            border-radius: 8px; appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: left 10px center;
-            background-color: white;
-        }
-
+        .action-btn { background-color: white; border: 1px solid #ccc; border-radius: 8px; padding: 8px 5px; font-size: 0.75rem; font-weight: bold; color: var(--pakar-main); height: 100%; display: flex; align-items: center; justify-content: center; }
+        .install-banner { display: none; background: #fff3cd; padding: 10px; text-align: center; border-bottom: 1px solid #ffeeba; font-size: 0.9rem; }
+        
+        .form-select { font-size: 0.85rem; padding: 8px 10px 8px 30px !important; border-radius: 8px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 10px center; background-color: white; }
         .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">1.2.34</div>
+<div id="installBanner" class="install-banner">
+    ניתן להתקין את האלפון כאפליקציה! 
+    <button onclick="installPWA()" class="btn btn-sm btn-warning ms-2">התקן עכשיו</button>
+</div>
+
+<div class="version-badge">1.2.35</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -105,7 +67,7 @@
     <div class="search-container">
         <div class="row g-1 align-items-stretch">
             <div class="col-6">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." oninput="debouncedSearch()">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש..." oninput="debouncedSearch()">
             </div>
             <div class="col-3">
                 <button onclick="resetAll()" class="action-btn w-100">✖ נקה</button>
@@ -134,16 +96,27 @@
 <script>
     let allContacts = [];
     let searchTimeout;
+    let deferredPrompt;
+
+    // לוגיקת PWA
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBanner').style.display = 'block';
+    });
+
+    async function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') document.getElementById('installBanner').style.display = 'none';
+        deferredPrompt = null;
+    }
 
     const getCsvUrl = () => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
 
-    function normalize(str) {
-        return str ? str.toString().trim().replace(/["'״׳]/g, '') : "";
-    }
-
     function loadData(isRefresh = false) {
         if(isRefresh) document.getElementById('contactsGrid').innerHTML = '<div class="text-center w-100 mt-4">מרענן...</div>';
-        
         fetch(getCsvUrl()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
                 header: true,
@@ -158,7 +131,6 @@
                         mobileWA: (row['mobileWA'] || '').trim(),
                         searchKey: `${row['firstName']} ${row['lastName']} ${row['role']} ${row['pluga']} ${row['framework']}`.toLowerCase()
                     })).filter(c => c.name !== '');
-                    
                     updateDropdowns(allContacts, true, true);
                     renderContacts(allContacts);
                 }
@@ -188,7 +160,6 @@
             plugot.forEach(p => html += `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`);
             pSel.innerHTML = html;
         }
-
         const pVal = document.getElementById('companyFilter').value;
         const fSel = document.getElementById('unitFilter');
         if (pVal) {
@@ -212,7 +183,6 @@
         const term = document.getElementById('searchInput').value.toLowerCase();
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
-        
         const res = allContacts.filter(c => {
             const mSearch = !term || c.searchKey.includes(term);
             const mP = !p || c.pluga === p;
@@ -233,11 +203,7 @@
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        if (!list.length) {
-            grid.innerHTML = '<div class="text-center w-100 mt-4">אין תוצאות</div>';
-            return;
-        }
-
+        if (!list.length) { grid.innerHTML = '<div class="text-center w-100 mt-4">אין תוצאות</div>'; return; }
         const html = list.map(c => `
             <div class="contact-col">
                 <div class="contact-card">
@@ -261,7 +227,6 @@
                     </div>
                 </div>
             </div>`).join('');
-        
         grid.innerHTML = html;
     }
 
@@ -275,6 +240,11 @@
     }
 
     loadData();
+
+    // רישום Service Worker בסיסי
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9PiBlLnJlc3BvbmRXaXRoKGZldGNoKGUucmVxdWVzdCkpKTs=');
+    }
 </script>
 </body>
 </html>
