@@ -10,24 +10,25 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    
     <style>
         body { background-color: #f0f2f5; font-family: system-ui, -apple-system, sans-serif; }
         .version-badge { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; color: #adb5bd; }
-        .contact-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; border: none; }
+        .contact-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; border: none; transition: transform 0.2s; }
+        .contact-card:hover { transform: translateY(-3px); }
         .name-header { font-size: 1.3rem; font-weight: 800; color: #1c1e21; margin-bottom: 4px; }
         .info-sub { font-size: 0.95rem; color: #65676b; margin-bottom: 15px; min-height: 40px; }
         .btn-group-custom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .btn-custom { padding: 10px 2px; font-size: 0.85rem; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white !important; transition: transform 0.1s; }
-        .btn-custom:active { transform: scale(0.95); }
+        .btn-custom { padding: 10px 2px; font-size: 0.85rem; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white !important; border: none; }
         .search-container { position: sticky; top: 0; background: #f0f2f5; z-index: 1000; padding: 15px 0; border-bottom: 1px solid #ddd; }
-        .vcf-btn { background-color: #6c757d; border: none; }
-        .wa-btn { background-color: #25D366; border: none; }
-        .tel-btn { background-color: #007bff; border: none; }
+        .vcf-btn { background-color: #6c757d; }
+        .wa-btn { background-color: #25D366; }
+        .tel-btn { background-color: #007bff; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">גרסה: 1.0.6</div>
+<div class="version-badge">גרסה: 1.0.7</div>
 
 <div class="container mt-2">
     <h2 class="text-center mb-4 font-weight-bold">אלפון יחידתי</h2>
@@ -35,7 +36,7 @@
     <div class="search-container">
         <div class="row g-2">
             <div class="col-12">
-                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש שם, תפקיד או פלוגה..." onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש חופשי (שם, תפקיד, פלוגה...)" onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -51,7 +52,10 @@
     </div>
 
     <div id="contactsGrid" class="row g-3 mt-2 pb-5">
-        <div class="text-center mt-5">טוען נתונים מהאלפון...</div>
+        <div class="text-center mt-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">טוען נתונים מהאלפון...</p>
+        </div>
     </div>
 </div>
 
@@ -59,7 +63,7 @@
     let allContacts = [];
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + new Date().getTime();
 
-    // טעינת הנתונים
+    // פונקציית טעינה ראשונית
     function loadData() {
         fetch(csvUrl)
             .then(response => response.text())
@@ -68,6 +72,7 @@
                     header: true,
                     skipEmptyLines: true,
                     complete: function(results) {
+                        // מיפוי הנתונים מהעמודות באקסל למבנה האובייקט
                         allContacts = results.data.map(row => ({
                             firstName: row['firstName'] || '',
                             lastName: row['lastName'] || '',
@@ -85,11 +90,11 @@
                 });
             })
             .catch(err => {
-                document.getElementById('contactsGrid').innerHTML = '<div class="alert alert-danger text-center">שגיאה בחיבור לנתונים. ודא שהקובץ מפורסם כ-CSV.</div>';
+                document.getElementById('contactsGrid').innerHTML = '<div class="alert alert-danger text-center">שגיאה בטעינת הנתונים. ודא שהקובץ מפורסם כ-CSV.</div>';
             });
     }
 
-    // עדכון פלוגות
+    // עדכון רשימת הפלוגות בתיבה
     function updatePlugaDropdown() {
         const pSelect = document.getElementById('companyFilter');
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
@@ -97,26 +102,27 @@
         plugot.forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
     }
 
-    // עדכון מסגרות לפי הפלוגה שנבחרה
+    // עדכון רשימת המסגרות בהתאם לפלוגה שנבחרה
     function updateFrameworkDropdown() {
         const selectedPluga = document.getElementById('companyFilter').value;
         const fSelect = document.getElementById('unitFilter');
         
-        const filteredForFrameworks = selectedPluga 
+        // אם נבחרה פלוגה, נציג רק מסגרות שקיימות בה
+        const relevantContacts = selectedPluga 
             ? allContacts.filter(c => c.pluga === selectedPluga)
             : allContacts;
             
-        const frameworks = [...new Set(filteredForFrameworks.map(c => c.framework))].filter(Boolean).sort();
+        const frameworks = [...new Set(relevantContacts.map(c => c.framework))].filter(Boolean).sort();
         
         fSelect.innerHTML = '<option value="">כל המסגרות</option>';
         frameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
     }
 
-    // הצגת הכרטיסים
+    // הצגת כרטיסי אנשי הקשר
     function renderContacts(contacts) {
         const grid = document.getElementById('contactsGrid');
         if (contacts.length === 0) {
-            grid.innerHTML = '<div class="text-center mt-5">לא נמצאו תוצאות התואמות לחיפוש</div>';
+            grid.innerHTML = '<div class="text-center mt-5">לא נמצאו תוצאות לחיפוש זה</div>';
             return;
         }
         
@@ -137,11 +143,12 @@
         });
     }
 
-    // פונקציית סינון משולבת
+    // פונקציית סינון משולבת (טקסט, פלוגה ומסגרת)
     function filterContacts(isPlugaChange = false) {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const selectedPluga = document.getElementById('companyFilter').value;
         
+        // אם הפלוגה השתנתה, עדכן את אפשרויות המסגרת
         if (isPlugaChange) {
             updateFrameworkDropdown();
         }
@@ -159,7 +166,7 @@
         renderContacts(filtered);
     }
 
-    // יצירת איש קשר
+    // הורדת קובץ איש קשר (VCard)
     function downloadVCard(f, l, p, o, t) {
         const vcard = [
             'BEGIN:VCARD',
@@ -180,6 +187,7 @@
         a.click();
     }
 
+    // הרצה ראשונית
     loadData();
 </script>
 </body>
