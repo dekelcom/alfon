@@ -23,13 +23,13 @@
 
         .header-section {
             text-align: center;
-            padding: 8px 0;
+            padding: 10px 0;
             background: white;
             border-bottom: 2px solid var(--pakar-accent);
         }
 
         .unit-logo {
-            width: 40px; /* לוגו מוקטן */
+            width: 45px;
             height: auto;
             margin-bottom: 3px;
         }
@@ -45,7 +45,7 @@
         .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
 
         .contact-col {
-            flex: 0 0 50%; /* 2 כרטיסים בשורה */
+            flex: 0 0 50%;
             max-width: 50%;
             padding: 4px;
         }
@@ -75,9 +75,8 @@
             color: #333 !important; padding: 0;
         }
 
-        .btn-label { font-size: 0.7rem; font-weight: bold; margin-top: 4px; }
+        .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; }
         
-        /* שימוש באייקונים ששלחת - גודל אחיד */
         .btn-icon-img { 
             width: 24px; 
             height: 24px; 
@@ -90,10 +89,10 @@
 </head>
 <body>
 
-<div class="version-badge">1.2.6</div>
+<div class="version-badge">1.2.27</div>
 
 <div class="header-section">
-    <img src="Pakar.svg.png" alt="לוגו" class="unit-logo">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
     <h4>גדוד 882 - אלפון יחידתי</h4>
 </div>
 
@@ -101,7 +100,7 @@
     <div class="search-container">
         <div class="row g-1">
             <div class="col-12 mb-1">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש לפי שם, תפקיד או פלוגה..." onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -123,7 +122,6 @@
 
 <script>
     let allContacts = [];
-    // קישור ה-CSV המקורי שלך
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
 
     function normalize(str) {
@@ -186,7 +184,7 @@
                             </a>
                             <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom">
                                 <img src="whatsapp.png" class="btn-icon-img" alt="הודעה">
-                                <span class="btn-label">הודעה</span>
+                                <span class="btn-label">שלח הודעה</span>
                             </a>
                             <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}')" class="btn-custom">
                                 <img src="contact.png" class="btn-icon-img" alt="שמירה">
