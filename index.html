@@ -16,18 +16,19 @@
         .version-badge { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; color: #adb5bd; }
         .contact-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; border: none; }
         .name-header { font-size: 1.3rem; font-weight: 800; color: #1c1e21; margin-bottom: 4px; }
-        .info-sub { font-size: 0.95rem; color: #65676b; margin-bottom: 15px; min-height: 40px; }
+        .info-sub { font-size: 0.95rem; color: #65676b; margin-bottom: 15px; min-height: 45px; }
         .btn-group-custom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .btn-custom { padding: 10px 2px; font-size: 0.85rem; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white !important; border: none; }
         .search-container { position: sticky; top: 0; background: #f0f2f5; z-index: 1000; padding: 15px 0; border-bottom: 1px solid #ddd; }
         .vcf-btn { background-color: #6c757d; }
         .wa-btn { background-color: #25D366; }
         .tel-btn { background-color: #007bff; }
+        .spinner-container { display: flex; justify-content: center; align-items: center; min-height: 200px; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">גרסה: 1.0.8</div>
+<div class="version-badge">גרסה: 1.0.9</div>
 
 <div class="container mt-2">
     <h2 class="text-center mb-4 font-weight-bold">אלפון יחידתי</h2>
@@ -51,7 +52,9 @@
     </div>
 
     <div id="contactsGrid" class="row g-3 mt-2 pb-5">
-        <div class="text-center mt-5">טוען נתונים...</div>
+        <div class="spinner-container">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
     </div>
 </div>
 
@@ -67,7 +70,6 @@
                     header: true,
                     skipEmptyLines: true,
                     complete: function(results) {
-                        // ניקוי רווחים מיותרים מהנתונים כדי למנוע כפילויות
                         allContacts = results.data.map(row => ({
                             firstName: (row['firstName'] || '').trim(),
                             lastName: (row['lastName'] || '').trim(),
@@ -78,32 +80,31 @@
                             mobileWA: (row['mobileWA'] || '').trim()
                         })).filter(c => c.firstName !== '');
 
-                        updatePlugaDropdown();
-                        updateFrameworkDropdown();
+                        initFilters();
                         renderContacts(allContacts);
                     }
                 });
             });
     }
 
-    function updatePlugaDropdown() {
+    function initFilters() {
         const pSelect = document.getElementById('companyFilter');
-        // הסרת כפילויות אחרי ניקוי רווחים
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
         pSelect.innerHTML = '<option value="">כל הפלוגות</option>';
         plugot.forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
+        updateFrameworkDropdown();
     }
 
     function updateFrameworkDropdown() {
         const selectedPluga = document.getElementById('companyFilter').value;
         const fSelect = document.getElementById('unitFilter');
         
-        // תיקון הסינון למפג"ד וכל שאר הערכים
-        const relevantContacts = selectedPluga 
+        // סינון מסגרות שקיימות תחת הפלוגה הנבחרת
+        const filtered = selectedPluga 
             ? allContacts.filter(c => c.pluga === selectedPluga)
             : allContacts;
             
-        const frameworks = [...new Set(relevantContacts.map(c => c.framework))].filter(Boolean).sort();
+        const frameworks = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
         
         fSelect.innerHTML = '<option value="">כל המסגרות</option>';
         frameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
@@ -111,7 +112,12 @@
 
     function renderContacts(contacts) {
         const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = contacts.length ? '' : '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
+        if (contacts.length === 0) {
+            grid.innerHTML = '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
+            return;
+        }
+        
+        grid.innerHTML = '';
         contacts.forEach(c => {
             grid.innerHTML += `
                 <div class="col-12 col-md-6 col-lg-4">
@@ -140,16 +146,27 @@
 
         const filtered = allContacts.filter(c => {
             const searchStr = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase();
-            return searchStr.includes(term) && 
-                   (!selectedPluga || c.pluga === selectedPluga) && 
-                   (!selectedFrame || c.framework === selectedFrame);
+            const matchSearch = searchStr.includes(term);
+            const matchPluga = !selectedPluga || c.pluga === selectedPluga;
+            const matchFrame = !selectedFrame || c.framework === selectedFrame;
+            return matchSearch && matchPluga && matchFrame;
         });
         
         renderContacts(filtered);
     }
 
     function downloadVCard(f, l, p, o, t) {
-        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${f} ${l}\nN;CHARSET=UTF-8:${l};${f};;;\nTEL;TYPE=CELL:${p}\nORG;CHARSET=UTF-8:${o}\nTITLE;CHARSET=UTF-8:${t}\nEND:VCARD`;
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN;CHARSET=UTF-8:${f} ${l}`,
+            `N;CHARSET=UTF-8:${l};${f};;;`,
+            `TEL;TYPE=CELL:${p}`,
+            `ORG;CHARSET=UTF-8:${o}`,
+            `TITLE;CHARSET=UTF-8:${t}`,
+            'END:VCARD'
+        ].join('\n');
+
         const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
         const a = document.createElement('a');
         a.href = window.URL.createObjectURL(blob);
