@@ -3,66 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אלפון יחידתי</title>
+    <title>גדוד 882 - אלפון יחידתי</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
     <style>
         :root {
-            --pakar-main: #7c4535; /* חום מהפלטה */
-            --pakar-accent: #d14a24; /* כתום מהפלטה */
+            --pakar-main: #7c4535; 
+            --pakar-accent: #d14a24; 
             --pakar-bg: #f4f4f2;
         }
 
         body { 
             background-color: var(--pakar-bg); 
             font-family: Tahoma, Geneva, sans-serif; 
-            color: #333;
+            margin: 0;
+            padding: 0;
         }
 
         .header-section {
             text-align: center;
-            padding: 25px 0;
+            padding: 10px 0;
             background: white;
-            border-bottom: 3px solid var(--pakar-accent);
-            margin-bottom: 20px;
+            border-bottom: 2px solid var(--pakar-accent);
         }
 
         .unit-logo {
-            width: 120px;
+            width: 50px; /* לוגו מוקטן */
             height: auto;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        .header-section h4 {
+            font-size: 1.1rem;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .search-container { 
+            position: sticky; 
+            top: 0; 
+            background: var(--pakar-bg); 
+            z-index: 1000; 
+            padding: 8px;
+        }
+
+        /* 2 כרטיסים בשורה */
+        .contacts-grid {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 4px;
+        }
+
+        .contact-col {
+            flex: 0 0 50%; /* בדיוק חצי מסך */
+            max-width: 50%;
+            padding: 4px;
         }
 
         .contact-card { 
             background: white; 
-            border-radius: 12px; 
-            padding: 20px; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            border-radius: 8px; 
+            padding: 10px; 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1); 
             height: 100%; 
-            border: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
         }
 
-        .name-header { font-size: 1.4rem; font-weight: bold; color: #000; margin-bottom: 5px; }
-        .info-sub { font-size: 1rem; color: #444; margin-bottom: 20px; line-height: 1.4; }
+        .name-header { font-size: 1rem; font-weight: bold; color: #000; margin-bottom: 2px; }
+        .info-sub { font-size: 0.75rem; color: #555; margin-bottom: 10px; line-height: 1.2; }
         
         .btn-group-custom { 
-            display: flex; 
-            gap: 8px; 
-            justify-content: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
         }
         
         .btn-custom { 
-            flex: 1;
-            padding: 10px 5px; 
-            font-size: 0.9rem; 
-            border-radius: 8px; 
+            padding: 6px 1px; 
+            font-size: 0.7rem; 
+            border-radius: 5px; 
             text-decoration: none; 
             font-weight: bold; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
+            justify-content: center;
             color: white !important;
         }
 
@@ -70,34 +100,32 @@
         .wa-btn { background-color: #25D366; }
         .vcf-btn { background-color: var(--pakar-main); }
         
-        .btn-icon { width: 22px; height: 22px; margin-bottom: 4px; }
-
-        .search-container { 
-            position: sticky; 
-            top: 0; 
-            background: var(--pakar-bg); 
-            z-index: 1000; 
-            padding: 15px 0;
+        /* גודל אייקונים אחיד */
+        .btn-icon { 
+            width: 18px; 
+            height: 18px; 
+            margin-bottom: 3px; 
+            object-fit: contain;
         }
 
-        .form-control, .form-select { border-radius: 8px; padding: 10px; border: 1px solid #ccc; }
+        .form-control, .form-select { font-size: 0.85rem; padding: 6px; }
 
-        .version-badge { position: absolute; top: 5px; left: 10px; font-size: 0.7rem; color: #ccc; }
+        .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">גרסה 1.2.2</div>
+<div class="version-badge">1.2.4</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
-    <h2 class="m-0">אלפון יחידתי</h2>
+    <h4>גדוד 882 - אלפון יחידתי</h4>
 </div>
 
-<div class="container">
+<div class="container-fluid">
     <div class="search-container">
-        <div class="row g-2">
-            <div class="col-12">
+        <div class="row g-1">
+            <div class="col-12 mb-1">
                 <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
@@ -113,8 +141,8 @@
         </div>
     </div>
 
-    <div id="contactsGrid" class="row g-3 mt-2 pb-5">
-        <div class="text-center">טוען נתונים...</div>
+    <div id="contactsGrid" class="contacts-grid pb-5">
+        <div class="text-center w-100 mt-4">טוען נתונים...</div>
     </div>
 </div>
 
@@ -166,20 +194,26 @@
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = list.length ? '' : '<div class="text-center">אין תוצאות</div>';
+        grid.innerHTML = list.length ? '' : '<div class="text-center w-100">אין תוצאות</div>';
         list.forEach(c => {
             grid.innerHTML += `
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="contact-card text-center">
-                        <div class="name-header">${c.firstName} ${c.lastName}</div>
-                        <div class="info-sub">${c.pluga} • ${c.framework}<br><strong>${c.role}</strong></div>
+                <div class="contact-col">
+                    <div class="contact-card">
+                        <div>
+                            <div class="name-header">${c.firstName} ${c.lastName}</div>
+                            <div class="info-sub">${c.pluga} • ${c.framework} • ${c.role}</div>
+                        </div>
                         <div class="btn-group-custom">
-                            <a href="tel:${c.mobile}" class="btn-custom tel-btn"><span>📞</span>חיוג</a>
+                            <a href="tel:${c.mobile}" class="btn-custom tel-btn">
+                                <span style="font-size:18px; margin-bottom:3px;">📞</span>חיוג
+                            </a>
                             <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom wa-btn">
                                 <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="btn-icon">
                                 WhatsApp
                             </a>
-                            <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}')" class="btn-custom vcf-btn"><span>👤</span>שמירה</button>
+                            <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}')" class="btn-custom vcf-btn">
+                                <span style="font-size:18px; margin-bottom:3px;">👤</span>שמירה
+                            </button>
                         </div>
                     </div>
                 </div>`;
@@ -192,7 +226,7 @@
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
         const res = allContacts.filter(c => {
-            const matchSearch = `${c.firstName} ${c.lastName} ${c.role}`.toLowerCase().includes(term);
+            const matchSearch = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase().includes(term);
             const matchP = !p || normalize(c.pluga) === normalize(p);
             const matchF = !f || normalize(c.framework) === normalize(f);
             return matchSearch && matchP && matchF;
