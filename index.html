@@ -14,8 +14,7 @@
     <style>
         body { background-color: #f0f2f5; font-family: system-ui, -apple-system, sans-serif; }
         .version-badge { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; color: #adb5bd; }
-        .contact-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; border: none; transition: transform 0.2s; }
-        .contact-card:hover { transform: translateY(-3px); }
+        .contact-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; border: none; }
         .name-header { font-size: 1.3rem; font-weight: 800; color: #1c1e21; margin-bottom: 4px; }
         .info-sub { font-size: 0.95rem; color: #65676b; margin-bottom: 15px; min-height: 40px; }
         .btn-group-custom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -28,7 +27,7 @@
 </head>
 <body>
 
-<div class="version-badge">גרסה: 1.0.7</div>
+<div class="version-badge">גרסה: 1.0.8</div>
 
 <div class="container mt-2">
     <h2 class="text-center mb-4 font-weight-bold">אלפון יחידתי</h2>
@@ -36,7 +35,7 @@
     <div class="search-container">
         <div class="row g-2">
             <div class="col-12">
-                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש חופשי (שם, תפקיד, פלוגה...)" onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -52,10 +51,7 @@
     </div>
 
     <div id="contactsGrid" class="row g-3 mt-2 pb-5">
-        <div class="text-center mt-5">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2">טוען נתונים מהאלפון...</p>
-        </div>
+        <div class="text-center mt-5">טוען נתונים...</div>
     </div>
 </div>
 
@@ -63,7 +59,6 @@
     let allContacts = [];
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + new Date().getTime();
 
-    // פונקציית טעינה ראשונית
     function loadData() {
         fetch(csvUrl)
             .then(response => response.text())
@@ -72,42 +67,38 @@
                     header: true,
                     skipEmptyLines: true,
                     complete: function(results) {
-                        // מיפוי הנתונים מהעמודות באקסל למבנה האובייקט
+                        // ניקוי רווחים מיותרים מהנתונים כדי למנוע כפילויות
                         allContacts = results.data.map(row => ({
-                            firstName: row['firstName'] || '',
-                            lastName: row['lastName'] || '',
-                            pluga: row['pluga'] || '',
-                            framework: row['framework'] || '',
-                            role: row['role'] || '',
-                            mobile: row['mobile'] || '',
-                            mobileWA: row['mobileWA'] || ''
-                        })).filter(c => c.firstName.trim() !== '');
+                            firstName: (row['firstName'] || '').trim(),
+                            lastName: (row['lastName'] || '').trim(),
+                            pluga: (row['pluga'] || '').trim(),
+                            framework: (row['framework'] || '').trim(),
+                            role: (row['role'] || '').trim(),
+                            mobile: (row['mobile'] || '').trim(),
+                            mobileWA: (row['mobileWA'] || '').trim()
+                        })).filter(c => c.firstName !== '');
 
                         updatePlugaDropdown();
                         updateFrameworkDropdown();
                         renderContacts(allContacts);
                     }
                 });
-            })
-            .catch(err => {
-                document.getElementById('contactsGrid').innerHTML = '<div class="alert alert-danger text-center">שגיאה בטעינת הנתונים. ודא שהקובץ מפורסם כ-CSV.</div>';
             });
     }
 
-    // עדכון רשימת הפלוגות בתיבה
     function updatePlugaDropdown() {
         const pSelect = document.getElementById('companyFilter');
+        // הסרת כפילויות אחרי ניקוי רווחים
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
         pSelect.innerHTML = '<option value="">כל הפלוגות</option>';
         plugot.forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
     }
 
-    // עדכון רשימת המסגרות בהתאם לפלוגה שנבחרה
     function updateFrameworkDropdown() {
         const selectedPluga = document.getElementById('companyFilter').value;
         const fSelect = document.getElementById('unitFilter');
         
-        // אם נבחרה פלוגה, נציג רק מסגרות שקיימות בה
+        // תיקון הסינון למפג"ד וכל שאר הערכים
         const relevantContacts = selectedPluga 
             ? allContacts.filter(c => c.pluga === selectedPluga)
             : allContacts;
@@ -118,15 +109,9 @@
         frameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
     }
 
-    // הצגת כרטיסי אנשי הקשר
     function renderContacts(contacts) {
         const grid = document.getElementById('contactsGrid');
-        if (contacts.length === 0) {
-            grid.innerHTML = '<div class="text-center mt-5">לא נמצאו תוצאות לחיפוש זה</div>';
-            return;
-        }
-        
-        grid.innerHTML = '';
+        grid.innerHTML = contacts.length ? '' : '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
         contacts.forEach(c => {
             grid.innerHTML += `
                 <div class="col-12 col-md-6 col-lg-4">
@@ -143,12 +128,10 @@
         });
     }
 
-    // פונקציית סינון משולבת (טקסט, פלוגה ומסגרת)
     function filterContacts(isPlugaChange = false) {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const selectedPluga = document.getElementById('companyFilter').value;
         
-        // אם הפלוגה השתנתה, עדכן את אפשרויות המסגרת
         if (isPlugaChange) {
             updateFrameworkDropdown();
         }
@@ -157,37 +140,23 @@
 
         const filtered = allContacts.filter(c => {
             const searchStr = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase();
-            const matchSearch = searchStr.includes(term);
-            const matchPluga = !selectedPluga || c.pluga === selectedPluga;
-            const matchFrame = !selectedFrame || c.framework === selectedFrame;
-            return matchSearch && matchPluga && matchFrame;
+            return searchStr.includes(term) && 
+                   (!selectedPluga || c.pluga === selectedPluga) && 
+                   (!selectedFrame || c.framework === selectedFrame);
         });
         
         renderContacts(filtered);
     }
 
-    // הורדת קובץ איש קשר (VCard)
     function downloadVCard(f, l, p, o, t) {
-        const vcard = [
-            'BEGIN:VCARD',
-            'VERSION:3.0',
-            `FN;CHARSET=UTF-8:${f} ${l}`,
-            `N;CHARSET=UTF-8:${l};${f};;;`,
-            `TEL;TYPE=CELL:${p}`,
-            `ORG;CHARSET=UTF-8:${o}`,
-            `TITLE;CHARSET=UTF-8:${t}`,
-            'END:VCARD'
-        ].join('\n');
-
+        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${f} ${l}\nN;CHARSET=UTF-8:${l};${f};;;\nTEL;TYPE=CELL:${p}\nORG;CHARSET=UTF-8:${o}\nTITLE;CHARSET=UTF-8:${t}\nEND:VCARD`;
         const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
+        a.href = window.URL.createObjectURL(blob);
         a.download = `${f}_${l}.vcf`;
         a.click();
     }
 
-    // הרצה ראשונית
     loadData();
 </script>
 </body>
