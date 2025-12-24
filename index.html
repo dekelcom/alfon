@@ -23,23 +23,23 @@
         .vcf-btn { background-color: #6c757d; }
         .wa-btn { background-color: #25D366; }
         .tel-btn { background-color: #007bff; }
-        .share-btn { background-color: #f8f9fa; color: #333 !important; border: 1px solid #ddd; border-radius: 20px; padding: 5px 15px; font-size: 0.8rem; float: left; }
+        .share-btn { background-color: #ffffff; color: #007bff !important; border: 1px solid #007bff; border-radius: 20px; padding: 5px 15px; font-size: 0.85rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">גרסה: 1.1.0</div>
+<div class="version-badge">גרסה: 1.1.1</div>
 
 <div class="container mt-2">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <button onclick="shareApp()" class="share-btn">🔗 שיתוף האלפון</button>
+        <button onclick="shareApp()" class="share-btn">🔗 שיתוף</button>
         <h2 class="m-0 font-weight-bold">אלפון יחידתי</h2>
-    </div>
+        <div style="width: 70px;"></div> </div>
     
     <div class="search-container">
         <div class="row g-2">
             <div class="col-12">
-                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש שם, תפקיד..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -63,10 +63,10 @@
     let allContacts = [];
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + new Date().getTime();
 
-    // פונקציית עזר לניקוי טקסט להשוואה אמינה
-    function clean(str) {
+    // פונקציית העזר הקריטית: מנקה את הטקסט מגרשיים ורווחים לצורך השוואה בלבד
+    function normalize(str) {
         if (!str) return "";
-        return str.toString().trim().replace(/["'״״]/g, ''); // מסיר רווחים וכל סוגי הגרשיים
+        return str.toString().trim().replace(/["'״״]/g, '');
     }
 
     function loadData() {
@@ -96,7 +96,7 @@
 
     function initFilters() {
         const pSelect = document.getElementById('companyFilter');
-        // הסרת כפילויות תוך התחשבות בניקוי רווחים
+        // שומרים על הערך המקורי לתצוגה, אבל מסירים כפילויות לוגיות
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
         pSelect.innerHTML = '<option value="">כל הפלוגות</option>';
         plugot.forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
@@ -108,7 +108,7 @@
         const fSelect = document.getElementById('unitFilter');
         
         const filtered = selectedPluga 
-            ? allContacts.filter(c => clean(c.pluga) === clean(selectedPluga))
+            ? allContacts.filter(c => normalize(c.pluga) === normalize(selectedPluga))
             : allContacts;
             
         const frameworks = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
@@ -149,8 +149,8 @@
         const filtered = allContacts.filter(c => {
             const searchStr = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase();
             const matchSearch = searchStr.includes(term);
-            const matchPluga = !selectedPluga || clean(c.pluga) === clean(selectedPluga);
-            const matchFrame = !selectedFrame || clean(c.framework) === clean(selectedFrame);
+            const matchPluga = !selectedPluga || normalize(c.pluga) === normalize(selectedPluga);
+            const matchFrame = !selectedFrame || normalize(c.framework) === normalize(selectedFrame);
             return matchSearch && matchPluga && matchFrame;
         });
         
@@ -158,14 +158,10 @@
     }
 
     function shareApp() {
-        const url = window.location.href;
         if (navigator.share) {
-            navigator.share({
-                title: 'אלפון יחידתי',
-                url: url
-            });
+            navigator.share({ title: 'אלפון יחידתי', url: window.location.href });
         } else {
-            prompt("העתק את הקישור לשיתוף:", url);
+            alert("העתק את כתובת האתר ושלח לחברים!");
         }
     }
 
