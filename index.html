@@ -39,7 +39,6 @@
         }
 
         .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
-
         .contact-col { flex: 0 0 50%; max-width: 50%; padding: 4px; }
 
         .contact-card { 
@@ -74,18 +73,29 @@
             background-color: white;
             border: 1px solid #ccc;
             border-radius: 8px;
-            padding: 5px 10px;
+            padding: 8px 10px;
             font-size: 0.8rem;
             font-weight: bold;
             color: var(--pakar-main);
+            height: 100%;
         }
 
-        /* תיקון ליישור הטקסט כדי שלא יסתיר את החץ */
+        /* תיקון סופי ליישור הטקסט והחץ */
         .form-select { 
             font-size: 0.85rem; 
-            padding: 8px; 
-            padding-left: 50px !important; 
+            padding: 8px 10px 8px 30px !important; /* רווח גדול משמאל לחץ */
             border-radius: 8px; 
+            appearance: none; /* ביטול עיצוב דפדפן */
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 10px center; /* מיקום החץ בשמאל */
+            background-color: white;
+        }
+
+        .form-select:disabled {
+            background-color: #e9ecef;
+            opacity: 0.6;
         }
 
         .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
@@ -94,7 +104,7 @@
 </head>
 <body>
 
-<div class="version-badge">1.2.29</div>
+<div class="version-badge">1.2.30</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -103,19 +113,19 @@
 
 <div class="container-fluid">
     <div class="search-container">
-        <div class="row g-1 align-items-center">
-            <div class="col-9 mb-1">
+        <div class="row g-1 align-items-stretch">
+            <div class="col-9">
                 <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
             </div>
-            <div class="col-3 mb-1 text-end">
+            <div class="col-3">
                 <button onclick="loadData(true)" class="refresh-btn w-100">🔄 רענן</button>
             </div>
-            <div class="col-6">
+            <div class="col-6 mt-1">
                 <select id="companyFilter" class="form-select" onchange="handleCompanyChange()">
                     <option value="">כל הפלוגות</option>
                 </select>
             </div>
-            <div class="col-6">
+            <div class="col-6 mt-1">
                 <select id="unitFilter" class="form-select" onchange="filterContacts()" disabled>
                     <option value="">כל המסגרות</option>
                 </select>
@@ -168,18 +178,15 @@
         plugot.forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
     }
 
-    // פונקציה חדשה לניהול שינוי פלוגה
     function handleCompanyChange() {
         const pVal = document.getElementById('companyFilter').value;
         const fSel = document.getElementById('unitFilter');
 
         if (!pVal) {
-            // אם נבחר "כל הפלוגות" - מאפסים ומנטרלים את המסגרת
             fSel.value = "";
             fSel.disabled = true;
             fSel.innerHTML = '<option value="">כל המסגרות</option>';
         } else {
-            // אם נבחרה פלוגה - מפעילים את המסגרת ומעדכנים רשימה
             fSel.disabled = false;
             updateFrameworks();
         }
