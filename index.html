@@ -28,12 +28,7 @@
             border-bottom: 2px solid var(--pakar-accent);
         }
 
-        .unit-logo {
-            width: 45px;
-            height: auto;
-            margin-bottom: 3px;
-        }
-
+        .unit-logo { width: 45px; height: auto; margin-bottom: 3px; }
         .header-section h4 { font-size: 1.1rem; margin: 0; font-weight: bold; }
 
         .search-container { 
@@ -45,11 +40,7 @@
 
         .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
 
-        .contact-col {
-            flex: 0 0 50%;
-            max-width: 50%;
-            padding: 4px;
-        }
+        .contact-col { flex: 0 0 50%; max-width: 50%; padding: 4px; }
 
         .contact-card { 
             background: white; 
@@ -85,18 +76,25 @@
             border-radius: 8px;
             padding: 5px 10px;
             font-size: 0.8rem;
-            margin-bottom: 10px;
             font-weight: bold;
             color: var(--pakar-main);
         }
 
-        .form-control, .form-select { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
+        /* תיקון ליישור הטקסט כדי שלא יסתיר את החץ */
+        .form-select { 
+            font-size: 0.85rem; 
+            padding: 8px; 
+            padding-left: 30px !important; 
+            border-radius: 8px; 
+        }
+
+        .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">1.2.28</div>
+<div class="version-badge">1.2.29</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -113,12 +111,12 @@
                 <button onclick="loadData(true)" class="refresh-btn w-100">🔄 רענן</button>
             </div>
             <div class="col-6">
-                <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
+                <select id="companyFilter" class="form-select" onchange="handleCompanyChange()">
                     <option value="">כל הפלוגות</option>
                 </select>
             </div>
             <div class="col-6">
-                <select id="unitFilter" class="form-select" onchange="filterContacts()">
+                <select id="unitFilter" class="form-select" onchange="filterContacts()" disabled>
                     <option value="">כל המסגרות</option>
                 </select>
             </div>
@@ -165,21 +163,37 @@
 
     function initFilters() {
         const pSel = document.getElementById('companyFilter');
-        const currentP = pSel.value;
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
         pSel.innerHTML = '<option value="">כל הפלוגות</option>';
-        plugot.forEach(p => pSel.innerHTML += `<option value="${p}" ${p === currentP ? 'selected' : ''}>${p}</option>`);
-        updateFrameworks();
+        plugot.forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
+    }
+
+    // פונקציה חדשה לניהול שינוי פלוגה
+    function handleCompanyChange() {
+        const pVal = document.getElementById('companyFilter').value;
+        const fSel = document.getElementById('unitFilter');
+
+        if (!pVal) {
+            // אם נבחר "כל הפלוגות" - מאפסים ומנטרלים את המסגרת
+            fSel.value = "";
+            fSel.disabled = true;
+            fSel.innerHTML = '<option value="">כל המסגרות</option>';
+        } else {
+            // אם נבחרה פלוגה - מפעילים את המסגרת ומעדכנים רשימה
+            fSel.disabled = false;
+            updateFrameworks();
+        }
+        filterContacts();
     }
 
     function updateFrameworks() {
         const p = document.getElementById('companyFilter').value;
         const fSel = document.getElementById('unitFilter');
-        const currentF = fSel.value;
-        const filtered = p ? allContacts.filter(c => normalize(c.pluga) === normalize(p)) : allContacts;
+        const filtered = allContacts.filter(c => normalize(c.pluga) === normalize(p));
         const frames = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
+        
         fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        frames.forEach(f => fSel.innerHTML += `<option value="${f}" ${f === currentF ? 'selected' : ''}>${f}</option>`);
+        frames.forEach(f => fSel.innerHTML += `<option value="${f}">${f}</option>`);
     }
 
     function renderContacts(list) {
@@ -200,7 +214,7 @@
                             </a>
                             <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom">
                                 <img src="whatsapp.png" class="btn-icon-img" alt="הודעה">
-                                <span class="btn-label">שלח הודעה</span>
+                                <span class="btn-label">הודעה</span>
                             </a>
                             <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="btn-custom">
                                 <img src="contact.png" class="btn-icon-img" alt="שמירה">
@@ -212,8 +226,7 @@
         });
     }
 
-    function filterContacts(pChange = false) {
-        if (pChange) updateFrameworks();
+    function filterContacts() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
@@ -227,15 +240,14 @@
     }
 
     function saveVCard(f, l, p, pluga, frame, role) {
-        // בניית כרטיס עם פרטים מורחבים
         const vcard = [
             'BEGIN:VCARD',
             'VERSION:3.0',
             `FN;CHARSET=UTF-8:${f} ${l}`,
             `N;CHARSET=UTF-8:${l};${f};;;`,
             `TEL;TYPE=CELL:${p}`,
-            `ORG;CHARSET=UTF-8:${pluga} - ${frame}`, // פלוגה ומסגרת בשם הארגון
-            `TITLE;CHARSET=UTF-8:${role}`,           // תפקיד בשדה התפקיד
+            `ORG;CHARSET=UTF-8:${pluga} - ${frame}`,
+            `TITLE;CHARSET=UTF-8:${role}`,
             'END:VCARD'
         ].join('\n');
 
