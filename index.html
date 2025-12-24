@@ -61,12 +61,13 @@
 
 <script>
     let allContacts = [];
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + new Date().getTime();
+    // הוספת Math.random() כדי לוודא שכל טעינה היא ייחודית ולא מהזיכרון
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&cachebust=' + Math.random();
 
-    // פונקציית העזר הקריטית: מנקה את הטקסט מגרשיים ורווחים לצורך השוואה בלבד
     function normalize(str) {
         if (!str) return "";
-        return str.toString().trim().replace(/["'״״]/g, '');
+        // מסיר גרשיים, גרשים ורווחים מיותרים להשוואה נקייה
+        return str.toString().trim().replace(/["'״׳]/g, '');
     }
 
     function loadData() {
@@ -96,10 +97,20 @@
 
     function initFilters() {
         const pSelect = document.getElementById('companyFilter');
-        // שומרים על הערך המקורי לתצוגה, אבל מסירים כפילויות לוגיות
-        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
+        // איחוד כפילויות גם אם יש הבדלי גרשיים ב-Sheets
+        const uniquePlugot = [];
+        const seen = new Set();
+        
+        allContacts.forEach(c => {
+            const cleanP = normalize(c.pluga);
+            if (cleanP && !seen.has(cleanP)) {
+                seen.add(cleanP);
+                uniquePlugot.push(c.pluga);
+            }
+        });
+
         pSelect.innerHTML = '<option value="">כל הפלוגות</option>';
-        plugot.forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
+        uniquePlugot.sort().forEach(p => pSelect.innerHTML += `<option value="${p}">${p}</option>`);
         updateFrameworkDropdown();
     }
 
@@ -111,29 +122,10 @@
             ? allContacts.filter(c => normalize(c.pluga) === normalize(selectedPluga))
             : allContacts;
             
-        const frameworks = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
+        const uniqueFrameworks = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
         
         fSelect.innerHTML = '<option value="">כל המסגרות</option>';
-        frameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
-    }
-
-    function renderContacts(contacts) {
-        const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = contacts.length ? '' : '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
-        contacts.forEach(c => {
-            grid.innerHTML += `
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="contact-card text-center shadow-sm">
-                        <div class="name-header">${c.firstName} ${c.lastName}</div>
-                        <div class="info-sub">${c.pluga} • ${c.framework}<br><strong>${c.role}</strong></div>
-                        <div class="btn-group-custom">
-                            <a href="tel:${c.mobile}" class="btn-custom tel-btn">📞 חיוג</a>
-                            <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom wa-btn">💬 WhatsApp</a>
-                            <button onclick="downloadVCard('${c.firstName}','${c.lastName}','${c.mobile}','${c.pluga}','${c.role}')" class="btn-custom vcf-btn">👤 שמירה</button>
-                        </div>
-                    </div>
-                </div>`;
-        });
+        uniqueFrameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
     }
 
     function filterContacts(isPlugaChange = false) {
@@ -157,11 +149,30 @@
         renderContacts(filtered);
     }
 
+    function renderContacts(contacts) {
+        const grid = document.getElementById('contactsGrid');
+        grid.innerHTML = contacts.length ? '' : '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
+        contacts.forEach(c => {
+            grid.innerHTML += `
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="contact-card text-center shadow-sm">
+                        <div class="name-header">${c.firstName} ${c.lastName}</div>
+                        <div class="info-sub">${c.pluga} • ${c.framework}<br><strong>${c.role}</strong></div>
+                        <div class="btn-group-custom">
+                            <a href="tel:${c.mobile}" class="btn-custom tel-btn">📞 חיוג</a>
+                            <a href="https://wa.me/${c.mobileWA}" target="_blank" class="btn-custom wa-btn">💬 WhatsApp</a>
+                            <button onclick="downloadVCard('${c.firstName}','${c.lastName}','${c.mobile}','${c.pluga}','${c.role}')" class="btn-custom vcf-btn">👤 שמירה</button>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+
     function shareApp() {
         if (navigator.share) {
             navigator.share({ title: 'אלפון יחידתי', url: window.location.href });
         } else {
-            alert("העתק את כתובת האתר ושלח לחברים!");
+            alert("העתק את כתובת האתר ושלח!");
         }
     }
 
