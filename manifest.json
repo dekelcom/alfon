@@ -1,0 +1,20 @@
+{
+  "name": "אלפון גדוד 882",
+  "short_name": "אלפון 882",
+  "start_url": "/alfon/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#7c4535",
+  "icons": [
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/192px-Pakar.svg.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/512px-Pakar.svg.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
