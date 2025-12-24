@@ -3,275 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אלפון גדוד 882</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#7c4535">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="apple-touch-icon" href="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/192px-Pakar.svg.png">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    
+    <title>אלפון ניווט מבצעי - מפה וסינון</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        :root {
-            --pakar-main: #7c4535; 
-            --pakar-bg: #f8f9fa;
-        }
-
-        body { background-color: var(--pakar-bg); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
+        :root { --primary: #2c3e50; --accent: #27ae60; --waze: #33ccff; }
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; background: #f4f4f4; }
         
-        /* כותרת */
-        .header-section { 
-            text-align: center; padding: 10px 0; background: white; 
-            border-bottom: 2px solid #d14a24; 
-        }
-        .unit-logo { width: 40px; height: auto; }
-        .header-section h4 { font-size: 1.1rem; margin: 5px 0 0; font-weight: bold; }
-
-        /* אזור חיפוש וסינון - פריסה קבועה */
-        .search-container { 
-            position: sticky; top: 0; background: var(--pakar-bg); 
-            z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; gap: 8px;
-        }
-
-        .row-flex { display: flex; gap: 8px; width: 100%; }
-        .flex-grow { flex-grow: 1; }
-
-        .custom-input, .custom-select {
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem;
-        }
-
-        .btn-action {
-            padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px;
-            background: white; font-weight: bold; color: var(--pakar-main); font-size: 0.85rem;
-            white-space: nowrap; cursor: pointer;
-        }
-
-        /* כרטיסי אנשי קשר - תיקון הצצוגה */
-        .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
-
-        @media (min-width: 992px) {
-            .contacts-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
-        }
-
-        .contact-card { 
-            background: white; border-radius: 12px; padding: 15px 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; 
-            justify-content: space-between; text-align: center; height: 100%;
-        }
-
-        .name-header { font-size: 1rem; font-weight: bold; margin-bottom: 4px; color: #000; }
-        .info-sub { font-size: 0.75rem; color: #666; line-height: 1.3; margin-bottom: 12px; min-height: 45px; }
+        .header { background: var(--primary); color: white; padding: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        /* כפתורי פעולה בתוך הכרטיס - חזרה למקור */
-        .card-actions { 
-            display: flex; justify-content: space-around; align-items: center; 
-            border-top: 1px solid #eee; padding-top: 10px;
-        }
-        .action-link { 
-            text-decoration: none !important; color: #333 !important; 
-            display: flex; flex-direction: column; align-items: center; flex: 1;
-        }
-        .action-icon { width: 30px; height: 30px; margin-bottom: 4px; }
-        .action-text { font-size: 0.7rem; font-weight: bold; }
+        .controls { background: white; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 1000; }
+        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; background: #fff; }
+        .full-width { grid-column: span 2; }
 
-        /* באנרים */
-        .banner { display: none; padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; }
-        #installBanner { background: #ffeb3b; border-bottom: 2px solid #fbc02d; }
-        #iosBanner { background: #e1f5fe; border-bottom: 2px solid #03a9f4; }
-        
-        .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #bbb; }
+        #map { flex-grow: 1; width: 100%; z-index: 1; }
+
+        .leaflet-popup-content { text-align: center; font-family: sans-serif; }
+        .waze-link { display: inline-block; margin-top: 10px; background: var(--waze); color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="installBanner" class="banner">
-    התקן אפליקציה <button onclick="installPWA()" class="btn btn-dark btn-sm ms-2">התקן</button>
-</div>
-<div id="iosBanner" class="banner">
-    אייפון: לחץ שיתוף ואז <b>"הוסף למסך הבית"</b>
+<div class="header">
+    <h2 style="margin:0; font-size: 1.2rem;">אלפון ניווט גזרתי</h2>
 </div>
 
-<div class="version-badge">1.2.41</div>
+<div class="controls">
+    <select id="plugaFilter" onchange="updateFilters()">
+        <option value="">כל הפלוגות</option>
+    </select>
 
-<div class="header-section">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
-    <h4>גדוד 882 - אלפון יחידתי</h4>
+    <select id="typeFilter" onchange="updateFilters()">
+        <option value="">כל הסוגים</option>
+    </select>
+
+    <input type="text" id="nameSearch" class="full-width" placeholder="חפש שם יעד ספציפי..." oninput="updateFilters()">
 </div>
 
-<div class="search-container">
-    <div class="row-flex">
-        <input type="text" id="searchInput" class="custom-input flex-grow" placeholder="חיפוש חופשי..." oninput="debouncedSearch()">
-        <button onclick="resetAll()" class="btn-action">✖ נקה</button>
-        <button onclick="loadData(true)" class="btn-action">🔄</button>
-    </div>
-    <div class="row-flex">
-        <select id="companyFilter" class="custom-select" onchange="handleCompanyChange()">
-            <option value="">כל הפלוגות</option>
-        </select>
-        <select id="unitFilter" class="custom-select" onchange="filterContacts()" disabled>
-            <option value="">כל המסגרות</option>
-        </select>
-    </div>
-</div>
-
-<div id="contactsGrid" class="contacts-grid">
-    <div style="grid-column: 1/-1; text-align: center; padding: 20px;">טוען נתונים...</div>
-</div>
+<div id="map"></div>
 
 <script>
-    let allContacts = [];
-    let searchTimeout;
-    let deferredPrompt;
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRQFmvRO2y4PoaVgEnhCOxf3G92L_0wO73LPbsCvn33n1zSvClsw0fjsVv090wBz0CKcho45E8HKPXX/pub?gid=1872889823&single=true&output=csv';
+    let allLocations = [];
+    let map, markersGroup;
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault(); deferredPrompt = e;
-        document.getElementById('installBanner').style.display = 'block';
-    });
-
-    window.addEventListener('load', () => {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-        if (isIOS && !isStandalone) document.getElementById('iosBanner').style.display = 'block';
-    });
-
-    async function installPWA() {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') document.getElementById('installBanner').style.display = 'none';
-        deferredPrompt = null;
+    // אתחול המפה
+    function initMap() {
+        map = L.map('map').setView([32.08, 35.28], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+        markersGroup = L.layerGroup().addTo(map);
     }
 
-    const getCsvUrl = () => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
+    async function loadData() {
+        try {
+            const response = await fetch(csvUrl);
+            const data = await response.text();
+            const rows = data.split('\n').slice(1);
+            
+            allLocations = rows.map(row => {
+                const cols = row.split(',');
+                return {
+                    type: cols[0]?.trim(),
+                    name: cols[1]?.trim(),
+                    lat: parseFloat(cols[2]),
+                    lon: parseFloat(cols[3]),
+                    pluga: cols[5]?.trim() // עמודה F
+                };
+            }).filter(loc => loc.name && !isNaN(loc.lat));
 
-    function loadData(isRefresh = false) {
-        if(isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center;">מרענן...</div>';
-        fetch(getCsvUrl()).then(r => r.text()).then(txt => {
-            Papa.parse(txt, {
-                header: true, skipEmptyLines: true,
-                complete: function(r) {
-                    allContacts = r.data.map(row => ({
-                        name: `${(row['firstName'] || '')} ${(row['lastName'] || '')}`.trim(),
-                        pluga: (row['pluga'] || '').trim(),
-                        framework: (row['framework'] || '').trim(),
-                        role: (row['role'] || '').trim(),
-                        mobile: (row['mobile'] || '').trim(),
-                        mobileWA: (row['mobileWA'] || '').trim(),
-                        searchKey: `${row['firstName']} ${row['lastName']} ${row['role']} ${row['pluga']} ${row['framework']}`.toLowerCase()
-                    })).filter(c => c.name !== '');
-                    updateDropdowns(allContacts, true, true);
-                    renderContacts(allContacts);
-                }
-            });
+            populateSelectors();
+            updateFilters();
+        } catch (e) { console.error("Error loading CSV:", e); }
+    }
+
+    function populateSelectors() {
+        const plugas = [...new Set(allLocations.map(l => l.pluga))].sort();
+        const types = [...new Set(allLocations.map(l => l.type))].sort();
+        
+        const pSelect = document.getElementById('plugaFilter');
+        plugas.forEach(p => p && pSelect.add(new Option(p, p)));
+
+        const tSelect = document.getElementById('typeFilter');
+        types.forEach(t => t && tSelect.add(new Option(t, t)));
+    }
+
+    function updateFilters() {
+        const pluga = document.getElementById('plugaFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const search = document.getElementById('nameSearch').value.toLowerCase();
+
+        const filtered = allLocations.filter(l => {
+            return (!pluga || l.pluga === pluga) &&
+                   (!type || l.type === type) &&
+                   (!search || l.name.toLowerCase().includes(search));
         });
+
+        displayOnMap(filtered);
     }
 
-    function debouncedSearch() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            updateDropdowns(getFilteredList(), true, false);
-            filterContacts();
-        }, 250);
-    }
+    function displayOnMap(data) {
+        markersGroup.clearLayers();
+        if (data.length === 0) return;
 
-    function getFilteredList() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        return term ? allContacts.filter(c => c.searchKey.includes(term)) : allContacts;
-    }
-
-    function updateDropdowns(list, updatePluga, updateFrame) {
-        if (updatePluga) {
-            const pSel = document.getElementById('companyFilter');
-            const current = pSel.value;
-            const plugot = [...new Set(list.map(c => c.pluga))].filter(Boolean).sort();
-            let html = '<option value="">כל הפלוגות</option>';
-            plugot.forEach(p => html += `<option value="${p}" ${p === current ? 'selected' : ''}>${p}</option>`);
-            pSel.innerHTML = html;
-        }
-        const pVal = document.getElementById('companyFilter').value;
-        const fSel = document.getElementById('unitFilter');
-        if (pVal) {
-            fSel.disabled = false;
-            const frames = [...new Set(list.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
-            let fHtml = '<option value="">כל המסגרות</option>';
-            frames.forEach(f => fHtml += `<option value="${f}">${f}</option>`);
-            fSel.innerHTML = fHtml;
-        } else {
-            fSel.disabled = true; fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        }
-    }
-
-    function handleCompanyChange() {
-        updateDropdowns(getFilteredList(), false, true);
-        filterContacts();
-    }
-
-    function filterContacts() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const p = document.getElementById('companyFilter').value;
-        const f = document.getElementById('unitFilter').value;
-        const res = allContacts.filter(c => {
-            const mSearch = !term || c.searchKey.includes(term);
-            const mP = !p || c.pluga === p;
-            const mF = !f || c.framework === f;
-            return mSearch && mP && mF;
-        });
-        renderContacts(res);
-    }
-
-    function resetAll() {
-        document.getElementById('searchInput').value = "";
-        document.getElementById('companyFilter').value = "";
-        document.getElementById('unitFilter').value = "";
-        document.getElementById('unitFilter').disabled = true;
-        updateDropdowns(allContacts, true, true);
-        renderContacts(allContacts);
-    }
-
-    function renderContacts(list) {
-        const grid = document.getElementById('contactsGrid');
-        if (!list.length) { grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">אין תוצאות</div>'; return; }
-        const html = list.map(c => `
-            <div class="contact-card">
+        const bounds = [];
+        data.forEach(loc => {
+            const marker = L.marker([loc.lat, loc.lon]);
+            const popupContent = `
                 <div>
-                    <div class="name-header">${c.name}</div>
-                    <div class="info-sub">${c.pluga} • ${c.framework}<br>${c.role}</div>
+                    <strong>${loc.name}</strong><br>
+                    ${loc.type} | פלוגה: ${loc.pluga}<br>
+                    <a href="https://waze.com/ul?ll=${loc.lat},${loc.lon}&navigate=yes" target="_blank" class="waze-link">ניווט עם Waze</a>
                 </div>
-                <div class="card-actions">
-                    <a href="javascript:void(0)" onclick="saveVCard('${c.name}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="action-link">
-                        <img src="contact.png" class="action-icon">
-                        <span class="action-text">שמירה</span>
-                    </a>
-                    <a href="https://wa.me/${c.mobileWA}" target="_blank" class="action-link">
-                        <img src="whatsapp.png" class="action-icon">
-                        <span class="action-text">הודעה</span>
-                    </a>
-                    <a href="tel:${c.mobile}" class="action-link">
-                        <img src="phone-call.png" class="action-icon">
-                        <span class="action-text">חייג</span>
-                    </a>
-                </div>
-            </div>`).join('');
-        grid.innerHTML = html;
+            `;
+            marker.bindPopup(popupContent);
+            markersGroup.addLayer(marker);
+            bounds.push([loc.lat, loc.lon]);
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
     }
 
-    function saveVCard(name, phone, pluga, frame, role) {
-        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${name}\nTEL;TYPE=CELL:${phone}\nORG;CHARSET=UTF-8:${pluga} - ${frame}\nTITLE;CHARSET=UTF-8:${role}\nEND:VCARD`;
-        const blob = new Blob([vcard], {type:'text/vcard;charset=utf-8'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${name.replace(/\s+/g, '_')}.vcf`;
-        a.click();
-    }
-
+    initMap();
     loadData();
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9PiBlLnJlc3BvbmRXaXRoKGZldGNoKGUucmVxdWVzdCkpKTs=');
-    }
 </script>
+
 </body>
 </html>
