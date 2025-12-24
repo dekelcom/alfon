@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>אלפון יחידתי</title>
+    <title>אלפון יחידתי - פיקוד העורף</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -12,34 +12,66 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
     <style>
-        body { background-color: #f0f2f5; font-family: system-ui, -apple-system, sans-serif; }
+        body { 
+            background-color: #f0f2f5; 
+            font-family: Tahoma, Segoe UI, sans-serif; 
+        }
         .version-badge { position: absolute; top: 10px; left: 10px; font-size: 0.7rem; color: #adb5bd; }
+        
+        /* עיצוב כותרת ולוגו */
+        .header-section {
+            text-align: center;
+            padding: 20px 0;
+            background: white;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .unit-logo {
+            width: 80px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .attribution {
+            font-size: 0.6rem;
+            color: #999;
+            margin-top: 5px;
+        }
+        .attribution a { color: #999; text-decoration: none; }
+
         .contact-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; border: none; }
         .name-header { font-size: 1.3rem; font-weight: 800; color: #1c1e21; margin-bottom: 4px; }
         .info-sub { font-size: 0.95rem; color: #65676b; margin-bottom: 15px; min-height: 45px; }
+        
         .btn-group-custom { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .btn-custom { padding: 10px 2px; font-size: 0.85rem; border-radius: 10px; text-decoration: none; text-align: center; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white !important; border: none; }
+        
         .search-container { position: sticky; top: 0; background: #f0f2f5; z-index: 1000; padding: 15px 0; border-bottom: 1px solid #ddd; }
+        
         .vcf-btn { background-color: #6c757d; }
         .wa-btn { background-color: #25D366; }
         .tel-btn { background-color: #007bff; }
-        .share-btn { background-color: #ffffff; color: #007bff !important; border: 1px solid #007bff; border-radius: 20px; padding: 5px 15px; font-size: 0.85rem; font-weight: bold; }
+        .share-btn { background-color: #ffffff; color: #ff8c00 !important; border: 1px solid #ff8c00; border-radius: 20px; padding: 5px 15px; font-size: 0.85rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">גרסה: 1.1.1</div>
+<div class="version-badge">גרסה: 1.2.0</div>
 
-<div class="container mt-2">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <button onclick="shareApp()" class="share-btn">🔗 שיתוף</button>
-        <h2 class="m-0 font-weight-bold">אלפון יחידתי</h2>
-        <div style="width: 70px;"></div> </div>
-    
+<div class="header-section">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Pikud_HaOref_Logo.svg/512px-Pikud_HaOref_Logo.svg.png" alt="לוגו פיקוד העורף" class="unit-logo">
+    <h2 class="m-0 font-weight-bold" style="color: #333;">אלפון יחידתי</h2>
+    <div class="attribution">
+        מאת <a href="//commons.wikimedia.org/wiki/User:%D7%A8%D7%95%D7%A0%D7%90%D7%9C%D7%93%D7%99%D7%A0%D7%99%D7%95_%D7%94%D7%9E%D7%9C%D7%9A">רונאלדיניו המלך</a> / <span>דובר צה"ל</span>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>
+    </div>
+</div>
+
+<div class="container mt-2 text-center">
+    <button onclick="shareApp()" class="share-btn mb-3">🔗 שיתוף האפליקציה</button>
+
     <div class="search-container">
         <div class="row g-2">
             <div class="col-12">
-                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש שם, תפקיד..." onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control form-control-lg" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -61,12 +93,10 @@
 
 <script>
     let allContacts = [];
-    // הוספת Math.random() כדי לוודא שכל טעינה היא ייחודית ולא מהזיכרון
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&cachebust=' + Math.random();
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Math.random();
 
     function normalize(str) {
         if (!str) return "";
-        // מסיר גרשיים, גרשים ורווחים מיותרים להשוואה נקייה
         return str.toString().trim().replace(/["'״׳]/g, '');
     }
 
@@ -97,7 +127,6 @@
 
     function initFilters() {
         const pSelect = document.getElementById('companyFilter');
-        // איחוד כפילויות גם אם יש הבדלי גרשיים ב-Sheets
         const uniquePlugot = [];
         const seen = new Set();
         
@@ -128,34 +157,13 @@
         uniqueFrameworks.forEach(f => fSelect.innerHTML += `<option value="${f}">${f}</option>`);
     }
 
-    function filterContacts(isPlugaChange = false) {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const selectedPluga = document.getElementById('companyFilter').value;
-        
-        if (isPlugaChange) {
-            updateFrameworkDropdown();
-        }
-        
-        const selectedFrame = document.getElementById('unitFilter').value;
-
-        const filtered = allContacts.filter(c => {
-            const searchStr = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase();
-            const matchSearch = searchStr.includes(term);
-            const matchPluga = !selectedPluga || normalize(c.pluga) === normalize(selectedPluga);
-            const matchFrame = !selectedFrame || normalize(c.framework) === normalize(selectedFrame);
-            return matchSearch && matchPluga && matchFrame;
-        });
-        
-        renderContacts(filtered);
-    }
-
     function renderContacts(contacts) {
         const grid = document.getElementById('contactsGrid');
         grid.innerHTML = contacts.length ? '' : '<div class="text-center mt-5">לא נמצאו תוצאות</div>';
         contacts.forEach(c => {
             grid.innerHTML += `
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="contact-card text-center shadow-sm">
+                <div class="col-12 col-md-6 col-lg-4 text-end">
+                    <div class="contact-card shadow-sm">
                         <div class="name-header">${c.firstName} ${c.lastName}</div>
                         <div class="info-sub">${c.pluga} • ${c.framework}<br><strong>${c.role}</strong></div>
                         <div class="btn-group-custom">
@@ -166,6 +174,21 @@
                     </div>
                 </div>`;
         });
+    }
+
+    function filterContacts(isPlugaChange = false) {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const selectedPluga = document.getElementById('companyFilter').value;
+        if (isPlugaChange) updateFrameworkDropdown();
+        const selectedFrame = document.getElementById('unitFilter').value;
+
+        const filtered = allContacts.filter(c => {
+            const searchStr = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase();
+            return searchStr.includes(term) && 
+                   (!selectedPluga || normalize(c.pluga) === normalize(selectedPluga)) && 
+                   (!selectedFrame || normalize(c.framework) === normalize(selectedFrame));
+        });
+        renderContacts(filtered);
     }
 
     function shareApp() {
