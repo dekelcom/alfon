@@ -38,11 +38,9 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        /* גריד גמיש: ברירת מחדל 2 בשורה (מובייל) */
         .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
         .contact-col { flex: 0 0 50%; max-width: 50%; padding: 4px; }
 
-        /* הגדרה למחשב: 4 בשורה במסכים רחבים */
         @media (min-width: 992px) {
             .contact-col { flex: 0 0 25%; max-width: 25%; }
             .container-fluid { max-width: 1200px; margin: 0 auto; }
@@ -92,21 +90,18 @@
             padding: 8px 10px 8px 30px !important; 
             border-radius: 8px; 
             appearance: none;
-            -webkit-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: left 10px center;
             background-color: white;
         }
 
-        .form-select:disabled { background-color: #e9ecef; opacity: 0.6; }
-        .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">1.2.31</div>
+<div class="version-badge">1.2.32</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -117,7 +112,7 @@
     <div class="search-container">
         <div class="row g-1 align-items-stretch">
             <div class="col-9">
-                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
+                <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="handleSearchInput()">
             </div>
             <div class="col-3">
                 <button onclick="loadData(true)" class="refresh-btn w-100">🔄 רענן</button>
@@ -166,18 +161,42 @@
                         mobile: (row['mobile'] || '').trim(),
                         mobileWA: (row['mobileWA'] || '').trim()
                     })).filter(c => c.firstName !== '');
-                    initFilters();
+                    
+                    updateCompanyDropdown(allContacts);
                     renderContacts(allContacts);
                 }
             });
         });
     }
 
-    function initFilters() {
+    // פונקציה לעדכון תיבת בחירת הפלוגות בהתבסס על רשימה נתונה
+    function updateCompanyDropdown(contactsList) {
         const pSel = document.getElementById('companyFilter');
-        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
+        const currentSelected = pSel.value;
+        const plugot = [...new Set(contactsList.map(c => c.pluga))].filter(Boolean).sort();
+        
         pSel.innerHTML = '<option value="">כל הפלוגות</option>';
-        plugot.forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
+        plugot.forEach(p => {
+            const selected = (p === currentSelected) ? 'selected' : '';
+            pSel.innerHTML += `<option value="${p}" ${selected}>${p}</option>`;
+        });
+    }
+
+    function handleSearchInput() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        
+        // אם יש חיפוש חופשי, נעדכן את רשימת הפלוגות הזמינות
+        if (term.length > 0) {
+            const matchedContacts = allContacts.filter(c => 
+                `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase().includes(term)
+            );
+            updateCompanyDropdown(matchedContacts);
+        } else {
+            // אם החיפוש ריק, נחזיר את כל הפלוגות
+            updateCompanyDropdown(allContacts);
+        }
+        
+        filterContacts();
     }
 
     function handleCompanyChange() {
@@ -239,6 +258,7 @@
         const term = document.getElementById('searchInput').value.toLowerCase();
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
+        
         const res = allContacts.filter(c => {
             const matchSearch = `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase().includes(term);
             const matchP = !p || normalize(c.pluga) === normalize(p);
