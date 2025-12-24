@@ -39,7 +39,8 @@
         .search-container { 
             position: sticky; top: 0; 
             background: var(--pakar-bg); 
-            z-index: 1000; padding: 6px;
+            z-index: 1000; padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
@@ -76,20 +77,26 @@
         }
 
         .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; }
-        
-        .btn-icon-img { 
-            width: 24px; 
-            height: 24px; 
-            object-fit: contain; 
+        .btn-icon-img { width: 24px; height: 24px; object-fit: contain; }
+
+        .refresh-btn {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--pakar-main);
         }
 
-        .form-control, .form-select { font-size: 0.85rem; padding: 6px; border-radius: 8px; }
+        .form-control, .form-select { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">1.2.27</div>
+<div class="version-badge">1.2.28</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -98,9 +105,12 @@
 
 <div class="container-fluid">
     <div class="search-container">
-        <div class="row g-1">
-            <div class="col-12 mb-1">
+        <div class="row g-1 align-items-center">
+            <div class="col-9 mb-1">
                 <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="filterContacts()">
+            </div>
+            <div class="col-3 mb-1 text-end">
+                <button onclick="loadData(true)" class="refresh-btn w-100">🔄 רענן</button>
             </div>
             <div class="col-6">
                 <select id="companyFilter" class="form-select" onchange="filterContacts(true)">
@@ -122,14 +132,18 @@
 
 <script>
     let allContacts = [];
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
+    const getCsvUrl = () => 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv&t=' + Date.now();
 
     function normalize(str) {
         return str ? str.toString().trim().replace(/["'״׳]/g, '') : "";
     }
 
-    function loadData() {
-        fetch(csvUrl).then(r => r.text()).then(txt => {
+    function loadData(isRefresh = false) {
+        if(isRefresh) {
+            document.getElementById('contactsGrid').innerHTML = '<div class="text-center w-100 mt-4">מרענן נתונים...</div>';
+        }
+        
+        fetch(getCsvUrl()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
                 header: true,
                 complete: function(r) {
@@ -151,19 +165,21 @@
 
     function initFilters() {
         const pSel = document.getElementById('companyFilter');
+        const currentP = pSel.value;
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
         pSel.innerHTML = '<option value="">כל הפלוגות</option>';
-        plugot.forEach(p => pSel.innerHTML += `<option value="${p}">${p}</option>`);
+        plugot.forEach(p => pSel.innerHTML += `<option value="${p}" ${p === currentP ? 'selected' : ''}>${p}</option>`);
         updateFrameworks();
     }
 
     function updateFrameworks() {
         const p = document.getElementById('companyFilter').value;
         const fSel = document.getElementById('unitFilter');
+        const currentF = fSel.value;
         const filtered = p ? allContacts.filter(c => normalize(c.pluga) === normalize(p)) : allContacts;
         const frames = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
         fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        frames.forEach(f => fSel.innerHTML += `<option value="${f}">${f}</option>`);
+        frames.forEach(f => fSel.innerHTML += `<option value="${f}" ${f === currentF ? 'selected' : ''}>${f}</option>`);
     }
 
     function renderContacts(list) {
@@ -186,7 +202,7 @@
                                 <img src="whatsapp.png" class="btn-icon-img" alt="הודעה">
                                 <span class="btn-label">שלח הודעה</span>
                             </a>
-                            <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}')" class="btn-custom">
+                            <button onclick="saveVCard('${c.firstName}','${c.lastName}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="btn-custom">
                                 <img src="contact.png" class="btn-icon-img" alt="שמירה">
                                 <span class="btn-label">שמירה</span>
                             </button>
@@ -210,11 +226,22 @@
         renderContacts(res);
     }
 
-    function saveVCard(f, l, p) {
-        const v = `BEGIN:VCARD\nVERSION:3.0\nFN:${f} ${l}\nTEL:${p}\nEND:VCARD`;
-        const b = new Blob([v], {type:'text/vcard'});
+    function saveVCard(f, l, p, pluga, frame, role) {
+        // בניית כרטיס עם פרטים מורחבים
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN;CHARSET=UTF-8:${f} ${l}`,
+            `N;CHARSET=UTF-8:${l};${f};;;`,
+            `TEL;TYPE=CELL:${p}`,
+            `ORG;CHARSET=UTF-8:${pluga} - ${frame}`, // פלוגה ומסגרת בשם הארגון
+            `TITLE;CHARSET=UTF-8:${role}`,           // תפקיד בשדה התפקיד
+            'END:VCARD'
+        ].join('\n');
+
+        const blob = new Blob([vcard], {type:'text/vcard;charset=utf-8'});
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(b);
+        a.href = URL.createObjectURL(blob);
         a.download = `${f}_${l}.vcf`;
         a.click();
     }
