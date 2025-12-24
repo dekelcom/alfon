@@ -38,8 +38,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
+        /* גריד גמיש: ברירת מחדל 2 בשורה (מובייל) */
         .contacts-grid { display: flex; flex-wrap: wrap; padding: 2px; }
         .contact-col { flex: 0 0 50%; max-width: 50%; padding: 4px; }
+
+        /* הגדרה למחשב: 4 בשורה במסכים רחבים */
+        @media (min-width: 992px) {
+            .contact-col { flex: 0 0 25%; max-width: 25%; }
+            .container-fluid { max-width: 1200px; margin: 0 auto; }
+        }
 
         .contact-card { 
             background: white; 
@@ -80,31 +87,26 @@
             height: 100%;
         }
 
-        /* תיקון סופי ליישור הטקסט והחץ */
         .form-select { 
             font-size: 0.85rem; 
-            padding: 8px 10px 8px 30px !important; /* רווח גדול משמאל לחץ */
+            padding: 8px 10px 8px 30px !important; 
             border-radius: 8px; 
-            appearance: none; /* ביטול עיצוב דפדפן */
+            appearance: none;
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: left 10px center; /* מיקום החץ בשמאל */
+            background-position: left 10px center;
             background-color: white;
         }
 
-        .form-select:disabled {
-            background-color: #e9ecef;
-            opacity: 0.6;
-        }
-
+        .form-select:disabled { background-color: #e9ecef; opacity: 0.6; }
         .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">1.2.30</div>
+<div class="version-badge">1.2.31</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
