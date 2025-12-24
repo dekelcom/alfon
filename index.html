@@ -74,15 +74,18 @@
         .btn-label { font-size: 0.65rem; font-weight: bold; margin-top: 4px; }
         .btn-icon-img { width: 24px; height: 24px; object-fit: contain; }
 
-        .refresh-btn {
+        .action-btn {
             background-color: white;
             border: 1px solid #ccc;
             border-radius: 8px;
-            padding: 8px 10px;
-            font-size: 0.8rem;
+            padding: 8px 5px;
+            font-size: 0.75rem;
             font-weight: bold;
             color: var(--pakar-main);
             height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .form-select { 
@@ -96,12 +99,13 @@
             background-color: white;
         }
 
+        .form-control { font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #ccc; }
     </style>
 </head>
 <body>
 
-<div class="version-badge">1.2.32</div>
+<div class="version-badge">1.2.33</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" alt="לוגו" class="unit-logo">
@@ -111,11 +115,14 @@
 <div class="container-fluid">
     <div class="search-container">
         <div class="row g-1 align-items-stretch">
-            <div class="col-9">
+            <div class="col-6">
                 <input type="text" id="searchInput" class="form-control" placeholder="חיפוש חופשי..." onkeyup="handleSearchInput()">
             </div>
             <div class="col-3">
-                <button onclick="loadData(true)" class="refresh-btn w-100">🔄 רענן</button>
+                <button onclick="resetAll()" class="action-btn w-100">✖ נקה</button>
+            </div>
+            <div class="col-3">
+                <button onclick="loadData(true)" class="action-btn w-100">🔄 רענן</button>
             </div>
             <div class="col-6 mt-1">
                 <select id="companyFilter" class="form-select" onchange="handleCompanyChange()">
@@ -162,40 +169,52 @@
                         mobileWA: (row['mobileWA'] || '').trim()
                     })).filter(c => c.firstName !== '');
                     
-                    updateCompanyDropdown(allContacts);
+                    updateFiltersBasedOnSearch();
                     renderContacts(allContacts);
                 }
             });
         });
     }
 
-    // פונקציה לעדכון תיבת בחירת הפלוגות בהתבסס על רשימה נתונה
+    function updateFiltersBasedOnSearch() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const matchedContacts = allContacts.filter(c => 
+            `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase().includes(term)
+        );
+
+        updateCompanyDropdown(matchedContacts);
+        
+        // אם נבחרה פלוגה, נעדכן גם את המסגרות בהתאם לחיפוש
+        const selectedCompany = document.getElementById('companyFilter').value;
+        if (selectedCompany) {
+            updateFrameworkDropdown(matchedContacts.filter(c => normalize(c.pluga) === normalize(selectedCompany)));
+        }
+    }
+
     function updateCompanyDropdown(contactsList) {
         const pSel = document.getElementById('companyFilter');
-        const currentSelected = pSel.value;
+        const currentVal = pSel.value;
         const plugot = [...new Set(contactsList.map(c => c.pluga))].filter(Boolean).sort();
         
         pSel.innerHTML = '<option value="">כל הפלוגות</option>';
         plugot.forEach(p => {
-            const selected = (p === currentSelected) ? 'selected' : '';
-            pSel.innerHTML += `<option value="${p}" ${selected}>${p}</option>`;
+            pSel.innerHTML += `<option value="${p}" ${p === currentVal ? 'selected' : ''}>${p}</option>`;
+        });
+    }
+
+    function updateFrameworkDropdown(contactsList) {
+        const fSel = document.getElementById('unitFilter');
+        const currentVal = fSel.value;
+        const frames = [...new Set(contactsList.map(c => c.framework))].filter(Boolean).sort();
+        
+        fSel.innerHTML = '<option value="">כל המסגרות</option>';
+        frames.forEach(f => {
+            fSel.innerHTML += `<option value="${f}" ${f === currentVal ? 'selected' : ''}>${f}</option>`;
         });
     }
 
     function handleSearchInput() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        
-        // אם יש חיפוש חופשי, נעדכן את רשימת הפלוגות הזמינות
-        if (term.length > 0) {
-            const matchedContacts = allContacts.filter(c => 
-                `${c.firstName} ${c.lastName} ${c.role} ${c.pluga} ${c.framework}`.toLowerCase().includes(term)
-            );
-            updateCompanyDropdown(matchedContacts);
-        } else {
-            // אם החיפוש ריק, נחזיר את כל הפלוגות
-            updateCompanyDropdown(allContacts);
-        }
-        
+        updateFiltersBasedOnSearch();
         filterContacts();
     }
 
@@ -209,24 +228,32 @@
             fSel.innerHTML = '<option value="">כל המסגרות</option>';
         } else {
             fSel.disabled = false;
-            updateFrameworks();
+            // מעדכנים מסגרות לפי הפלוגה והחיפוש הנוכחי
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allContacts.filter(c => 
+                normalize(c.pluga) === normalize(pVal) && 
+                `${c.firstName} ${c.lastName} ${c.role} ${c.framework}`.toLowerCase().includes(term)
+            );
+            updateFrameworkDropdown(filtered);
         }
         filterContacts();
     }
 
-    function updateFrameworks() {
-        const p = document.getElementById('companyFilter').value;
+    function resetAll() {
+        document.getElementById('searchInput').value = "";
+        const pSel = document.getElementById('companyFilter');
         const fSel = document.getElementById('unitFilter');
-        const filtered = allContacts.filter(c => normalize(c.pluga) === normalize(p));
-        const frames = [...new Set(filtered.map(c => c.framework))].filter(Boolean).sort();
+        pSel.value = "";
+        fSel.value = "";
+        fSel.disabled = true;
         
-        fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        frames.forEach(f => fSel.innerHTML += `<option value="${f}">${f}</option>`);
+        updateFiltersBasedOnSearch();
+        renderContacts(allContacts);
     }
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = list.length ? '' : '<div class="text-center w-100">אין תוצאות</div>';
+        grid.innerHTML = list.length ? '' : '<div class="text-center w-100 mt-4">אין תוצאות</div>';
         list.forEach(c => {
             grid.innerHTML += `
                 <div class="contact-col">
