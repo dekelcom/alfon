@@ -6,17 +6,25 @@
     <title>אלפון גדוד 882</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="vcard.js"></script> <style>
+    <script src="vcard.js"></script> 
+    
+    <style>
         :root { --pakar-main: #7c4535; --pakar-bg: #f8f9fa; }
         body { background-color: var(--pakar-bg); font-family: system-ui, sans-serif; margin: 0; padding: 0; }
-        .version-tag { position: absolute; top: 5px; left: 10px; font-size: 0.65rem; color: #999; font-weight: bold; }
+        
+        /* הצגת מספר גרסה בולטת */
+        .version-tag { 
+            position: absolute; top: 10px; left: 15px; 
+            font-size: 0.75rem; color: #777; font-weight: bold; 
+            background: #eee; padding: 2px 8px; border-radius: 4px;
+        }
         
         .container { 
-            background: white; padding: 15px; border-bottom: 3px solid #d14a24; 
+            background: white; padding: 20px 15px 15px; border-bottom: 3px solid #d14a24; 
             text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .flex-row { display: flex; gap: 6px; margin-top: 10px; }
+        .flex-row { display: flex; gap: 8px; margin-top: 10px; }
         .flex-grow { flex: 1; min-width: 0; }
 
         input, select { 
@@ -24,7 +32,7 @@
             font-size: 16px !important; width: 100%; box-sizing: border-box; background: white;
         }
 
-        .btn-clear { background: #eee; border: 1px solid #ccc; border-radius: 8px; padding: 0 15px; font-weight: bold; cursor: pointer; }
+        .btn-clear { background: #f0f0f0; border: 1px solid #ccc; border-radius: 8px; padding: 0 15px; font-weight: bold; cursor: pointer; color: #333; }
 
         .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; align-items: start; }
         @media (min-width: 900px) { .contacts-grid { grid-template-columns: repeat(4, 1fr); } }
@@ -32,18 +40,18 @@
         .contact-card { 
             background: white; border-radius: 12px; padding: 15px 8px; 
             box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; height: 100%;
         }
 
         .name-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 2px; color: #000; }
         .phone-display { font-size: 1.1rem; font-weight: bold; display: block; direction: ltr; margin-bottom: 8px; color: #000; }
-        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; }
+        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; min-height: 40px; }
         
         .card-actions { display: flex; border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; }
         .action-item { 
             flex: 1; text-decoration: none !important; color: #333 !important; 
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            background: none; border: none;
+            background: none; border: none; font-family: inherit;
         }
         .action-icon { width: 28px; height: 28px; margin-bottom: 4px; }
         .action-text { font-size: 0.7rem; font-weight: bold; }
@@ -51,14 +59,13 @@
 </head>
 <body>
 
-<div class="version-tag">V 2.0.1 (vCard Library)</div>
-
 <div class="container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" style="width:40px">
-    <h4 style="margin:5px 0">אלפון גדוד 882</h4>
+    <div class="version-tag">V 2.0.2</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" style="width:45px">
+    <h3 style="margin:8px 0 0">אלפון גדוד 882</h3>
     
     <div class="flex-row">
-        <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()" class="flex-grow">
+        <input type="text" id="searchInput" placeholder="חיפוש חופשי..." oninput="filterContacts()" class="flex-grow">
         <button onclick="resetAll()" class="btn-clear">נקה</button>
     </div>
     <div class="flex-row">
@@ -71,7 +78,9 @@
     </div>
 </div>
 
-<div id="contactsGrid" class="contacts-grid"></div>
+<div id="contactsGrid" class="contacts-grid">
+    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">טוען נתונים...</div>
+</div>
 
 <script>
     let allContacts = [];
@@ -99,26 +108,35 @@
         });
     }
 
-    // שימוש בספריית ה-vCard החדשה
-    function exportContact(index) {
-        const c = allContacts[index];
+    // הפונקציה שמשתמשת בספרייה vcard.js שהוספת
+    function exportToContacts(idx) {
+        const c = allContacts[idx];
         try {
-            var card = vCard.create(vCard.Version.THREE);
-            card.addName(c.lastName, c.firstName);
-            card.addPhone(c.mobile, vCard.Type.CELL);
-            card.addOrganization(c.pluga + " - " + c.framework);
-            card.addTitle(c.role);
+            // יצירת הכרטיס באמצעות ה-context של vcard.js
+            var myCard = vCard.create(vCard.Version.THREE);
+            myCard.addName(c.lastName, c.firstName);
+            myCard.addPhone(c.mobile, vCard.Type.CELL);
+            myCard.addOrganization(c.pluga + " - " + c.framework);
+            myCard.addTitle(c.role);
             
-            // הפונקציה export מהקובץ שלך יוצרת אלמנט <a> ומקליקה עליו
-            vCard.export(card, c.name, true);
-        } catch(e) {
-            console.error("vCard Export Error:", e);
+            // הפעלה של פונקציית ה-export מהספרייה
+            vCard.export(myCard, c.name, true);
+        } catch (err) {
+            console.error("שגיאה בייצוא איש קשר:", err);
+            alert("חלה שגיאה בשמירה. וודא שקובץ vcard.js נטען כראוי.");
         }
     }
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = list.map((c, index) => `
+        if (list.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px;">אין תוצאות</div>';
+            return;
+        }
+        grid.innerHTML = list.map((c, index) => {
+            // מציאת האינדקס האמיתי במערך המקור לצורך השמירה
+            const originalIndex = allContacts.indexOf(c);
+            return `
             <div class="contact-card">
                 <div>
                     <div class="name-header">${c.name}</div>
@@ -126,7 +144,7 @@
                     <div class="info-sub">${c.pluga} • ${c.framework}<br>${c.role}</div>
                 </div>
                 <div class="card-actions">
-                    <button onclick="exportContact(${allContacts.indexOf(c)})" class="action-item">
+                    <button onclick="exportToContacts(${originalIndex})" class="action-item">
                         <img src="contact.png" class="action-icon">
                         <span class="action-text">שמירה</span>
                     </button>
@@ -139,10 +157,11 @@
                         <span class="action-text">חייג</span>
                     </a>
                 </div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
     }
 
-    // פונקציות סינון רגילות
+    // ניהול דרופדאונים וסינונים
     function updateDropdowns() {
         const pSel = document.getElementById('companyFilter');
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
@@ -173,6 +192,7 @@
     function resetAll() {
         document.getElementById('searchInput').value = "";
         document.getElementById('companyFilter').value = "";
+        document.getElementById('unitFilter').value = "";
         document.getElementById('unitFilter').disabled = true;
         renderContacts(allContacts);
     }
