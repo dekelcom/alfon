@@ -111,8 +111,8 @@
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
                         role: (row.role || '').trim(),
-                        mobile: (row.mobileE164 || '').trim(),
-                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobileE164}`.toLowerCase()
+                        mobile: (row.mobile || '').trim(),
+                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
                     })).filter(c => c.name && c.mobile);
                     updatePlugaDropdown();
                     renderContacts(allContacts);
