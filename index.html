@@ -112,7 +112,7 @@
 
     // יצירת הקובץ להורדה - השיטה הכי בטוחה
     function getVCardHref(c) {
-        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${c.name}\nN;CHARSET=UTF-8:;${c.name};;;\nTEL;TYPE=CELL:${c.mobile}\nORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}\nTITLE;CHARSET=UTF-8:${c.role}\nEND:VCARD`;
+        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${c.name}\nN;CHARSET=UTF-8:;${c.name};;;\nTEL;TYPE=CELL:${c.mobileE164}\nORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}\nTITLE;CHARSET=UTF-8:${c.role}\nEND:VCARD`;
         return 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
     }
 
