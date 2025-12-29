@@ -14,17 +14,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
     <style>
-        :root {
-            --pakar-main: #7c4535; 
-            --pakar-bg: #f8f9fa;
-        }
-
+        :root { --pakar-main: #7c4535; --pakar-bg: #f8f9fa; }
         body { background-color: var(--pakar-bg); font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         
-        .header-section { 
-            text-align: center; padding: 10px 0; background: white; 
-            border-bottom: 2px solid #d14a24; 
-        }
+        .header-section { text-align: center; padding: 10px 0; background: white; border-bottom: 2px solid #d14a24; }
         .unit-logo { width: 40px; height: auto; }
         .header-section h4 { font-size: 1.1rem; margin: 5px 0 0; font-weight: bold; }
 
@@ -33,54 +26,30 @@
             z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: flex; flex-direction: column; gap: 8px;
         }
-
         .row-flex { display: flex; gap: 8px; width: 100%; }
         .flex-grow { flex-grow: 1; }
-
-        .custom-input, .custom-select {
-            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem;
-        }
-
-        .btn-action {
-            padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px;
-            background: white; font-weight: bold; color: var(--pakar-main); font-size: 0.85rem;
-            white-space: nowrap; cursor: pointer;
-        }
+        .custom-input, .custom-select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 0.9rem; }
+        .btn-action { padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; background: white; font-weight: bold; color: var(--pakar-main); font-size: 0.85rem; cursor: pointer; }
 
         .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
-
-        @media (min-width: 992px) {
-            .contacts-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
-        }
+        @media (min-width: 992px) { .contacts-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
 
         .contact-card { 
             background: white; border-radius: 12px; padding: 15px 5px; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; 
             justify-content: space-between; text-align: center; height: 100%;
         }
-
         .name-header { font-size: 1rem; font-weight: bold; margin-bottom: 4px; color: #000; }
         .info-sub { font-size: 0.75rem; color: #666; line-height: 1.3; margin-bottom: 12px; min-height: 45px; }
         
-        .card-actions { 
-            display: flex; justify-content: space-around; align-items: center; 
-            border-top: 1px solid #eee; padding-top: 10px;
-        }
-
-        /* תיקון לחצן שמירה */
-        .action-btn-trigger {
-            background: none; border: none; padding: 0; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; flex: 1;
-            text-decoration: none !important; color: #333 !important;
-        }
-        
+        .card-actions { display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #eee; padding-top: 10px; }
+        .action-item { background: none; border: none; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; flex: 1; text-decoration: none !important; color: #333 !important; }
         .action-icon { width: 30px; height: 30px; margin-bottom: 4px; }
         .action-text { font-size: 0.7rem; font-weight: bold; }
 
         .banner { display: none; padding: 12px; text-align: center; font-weight: bold; font-size: 0.9rem; }
         #installBanner { background: #ffeb3b; border-bottom: 2px solid #fbc02d; }
         #iosBanner { background: #e1f5fe; border-bottom: 2px solid #03a9f4; }
-        
         .version-badge { position: absolute; top: 2px; left: 5px; font-size: 0.5rem; color: #bbb; }
     </style>
 </head>
@@ -93,7 +62,7 @@
     אייפון: לחץ שיתוף ואז <b>"הוסף למסך הבית"</b>
 </div>
 
-<div class="version-badge">1.2.42</div>
+<div class="version-badge">1.2.43</div>
 
 <div class="header-section">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
@@ -125,6 +94,7 @@
     let searchTimeout;
     let deferredPrompt;
 
+    // זיהוי התקנה
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault(); deferredPrompt = e;
         document.getElementById('installBanner').style.display = 'block';
@@ -233,39 +203,58 @@
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
         if (!list.length) { grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">אין תוצאות</div>'; return; }
-        const html = list.map(c => `
+        grid.innerHTML = list.map(c => `
             <div class="contact-card">
                 <div>
                     <div class="name-header">${c.name}</div>
                     <div class="info-sub">${c.pluga} • ${c.framework}<br>${c.role}</div>
                 </div>
                 <div class="card-actions">
-                    <button onclick="saveVCard('${c.name}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="action-btn-trigger">
+                    <button onclick="saveVCard('${c.name}','${c.mobile}','${c.pluga}','${c.framework}','${c.role}')" class="action-item">
                         <img src="contact.png" class="action-icon">
                         <span class="action-text">שמירה</span>
                     </button>
-                    <a href="https://wa.me/${c.mobileWA}" target="_blank" class="action-btn-trigger">
+                    <a href="https://wa.me/${c.mobileWA}" target="_blank" class="action-item">
                         <img src="whatsapp.png" class="action-icon">
                         <span class="action-text">הודעה</span>
                     </a>
-                    <a href="tel:${c.mobile}" class="action-btn-trigger">
+                    <a href="tel:${c.mobile}" class="action-item">
                         <img src="phone-call.png" class="action-icon">
                         <span class="action-text">חייג</span>
                     </a>
                 </div>
             </div>`).join('');
-        grid.innerHTML = html;
     }
 
+    // פונקציית שמירת איש קשר מתוקנת
     function saveVCard(name, phone, pluga, frame, role) {
-        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${name}\nTEL;TYPE=CELL:${phone}\nORG;CHARSET=UTF-8:${pluga} - ${frame}\nTITLE;CHARSET=UTF-8:${role}\nEND:VCARD`;
-        const blob = new Blob([vcard], {type:'text/vcard;charset=utf-8'});
+        const cleanName = name.trim();
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN;CHARSET=UTF-8:${cleanName}`,
+            `N;CHARSET=UTF-8:;${cleanName};;;`,
+            `TEL;TYPE=CELL:${phone}`,
+            `ORG;CHARSET=UTF-8:${pluga} - ${frame}`,
+            `TITLE;CHARSET=UTF-8:${role}`,
+            'END:VCARD'
+        ].join('\n');
+
+        const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${name.replace(/\s+/g, '_')}.vcf`;
+        
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `${cleanName.replace(/\s+/g, '_')}.vcf`;
+        
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
+        
+        setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }, 100);
     }
 
     loadData();
