@@ -32,10 +32,8 @@
         .btn-top { 
             background: white; border: 1px solid #ccc; border-radius: 8px; 
             padding: 0 15px; font-weight: bold; color: var(--pakar-main); cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
         }
 
-        /* תיקון הגריד למניעת דריסה */
         .contacts-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
@@ -50,11 +48,12 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
             display: flex; flex-direction: column; 
             text-align: center;
-            height: auto; /* מאפשר לכרטיס לגדול לפי התוכן */
         }
 
         .name-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 2px; color: #000; }
-        .phone-sub-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: #000; direction: ltr; }
+        /* מספר הנייד מתחת לשם - באותו פונט וגודל */
+        .phone-sub-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: #000; direction: ltr; display: block; }
+        
         .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; }
         
         .card-actions { display: flex; border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; }
@@ -73,14 +72,14 @@
 <div id="iosBanner" class="banner">אייפון: לחץ שיתוף ואז "הוסף למסך הבית"</div>
 
 <div class="header-section">
-    <div class="version-tag">V 1.2.47</div>
+    <div class="version-tag">V 1.2.48</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
 
 <div class="search-container">
     <div class="flex-row">
-        <input type="text" id="searchInput" placeholder="חיפוש חופשי..." oninput="filterContacts()" class="flex-grow">
+        <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()" class="flex-grow">
         <button onclick="resetAll()" class="btn-top">נקה</button>
     </div>
     <div class="flex-row">
@@ -93,9 +92,7 @@
     </div>
 </div>
 
-<div id="contactsGrid" class="contacts-grid">
-    <div style="grid-column: 1/-1; text-align: center; padding: 20px; color: #666;">טוען נתונים...</div>
-</div>
+<div id="contactsGrid" class="contacts-grid"></div>
 
 <script>
     let allContacts = [];
@@ -111,8 +108,8 @@
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
                         role: (row.role || '').trim(),
-                        mobile: (row.mobile || '').trim(),
-                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
+                        mobile: (row.mobileE164 || '').trim(),
+                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobileE164}`.toLowerCase()
                     })).filter(c => c.name && c.mobile);
                     updatePlugaDropdown();
                     renderContacts(allContacts);
@@ -121,17 +118,26 @@
         });
     }
 
+    // פונקציית יצירת VCard משופרת לאייפון
     function getVCardHref(c) {
-        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN;CHARSET=UTF-8:${c.name}\nN;CHARSET=UTF-8:;${c.name};;;\nTEL;TYPE=CELL:${c.mobile}\nORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}\nTITLE;CHARSET=UTF-8:${c.role}\nEND:VCARD`;
-        return 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN;CHARSET=UTF-8:${c.name}`,
+            `N;CHARSET=UTF-8:;${c.name};;;`,
+            `TEL;TYPE=CELL:${c.mobile}`,
+            `ORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}`,
+            `TITLE;CHARSET=UTF-8:${c.role}`,
+            'END:VCARD'
+        ].join('\n');
+        
+        // קידוד Base64 עוזר לספארי להבין שמדובר בקובץ בינארי להורדה
+        const base64Vcard = btoa(unescape(encodeURIComponent(vcard)));
+        return 'data:text/vcard;base64,' + base64Vcard;
     }
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        if (list.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px;">אין תוצאות לחיפוש</div>';
-            return;
-        }
         grid.innerHTML = list.map(c => `
             <div class="contact-card">
                 <div>
@@ -144,7 +150,7 @@
                         <img src="contact.png" class="action-icon">
                         <span class="action-text">שמירה</span>
                     </a>
-                    <a href="https://wa.me/${c.mobile.replace('+', '').replace(/\s/g, '')}" target="_blank" class="action-link">
+                    <a href="https://wa.me/${c.mobile.replace(/\D/g, '')}" target="_blank" class="action-link">
                         <img src="whatsapp.png" class="action-icon">
                         <span class="action-text">הודעה</span>
                     </a>
@@ -190,7 +196,6 @@
     function resetAll() {
         document.getElementById('searchInput').value = "";
         document.getElementById('companyFilter').value = "";
-        document.getElementById('unitFilter').value = "";
         document.getElementById('unitFilter').disabled = true;
         renderContacts(allContacts);
     }
