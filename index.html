@@ -94,7 +94,7 @@
 <div id="iosBanner" class="banner">אייפון: לחץ שיתוף ואז "הוסף למסך הבית"</div>
 
 <div class="header-section">
-    <div class="version-tag">V 2.1.6</div>
+    <div class="version-tag">V 3.0.0</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -159,7 +159,10 @@
             grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px;">אין תוצאות</div>';
             return;
         }
-        grid.innerHTML = list.map(c => `
+        grid.innerHTML = list.map(c => {
+            // יצירת מזהה ייחודי לכל איש קשר לצורך השמירה
+            const contactId = allContacts.indexOf(c);
+            return `
             <div class="contact-card">
                 <div>
                     <div class="name-header">${c.name}</div>
@@ -167,10 +170,10 @@
                     <div class="phone-display">${c.mobile}</div>
                 </div>
                 <div class="card-actions">
-                    <a href="data:text/vcard;charset=utf-8,${encodeURIComponent(getVCardData(c))}" download="${c.name}.vcf" class="action-link">
+                    <button onclick="downloadVCard(${contactId})" class="action-link" style="background:none; border:none; width:100%;">
                         <img src="contact.png" class="action-icon">
                         <span class="action-text">שמירה</span>
-                    </a>
+                    </button>
                     <a href="https://wa.me/${c.mobile.replace(/\D/g, '')}" target="_blank" class="action-link">
                         <img src="whatsapp.png" class="action-icon">
                         <span class="action-text">הודעה</span>
@@ -180,11 +183,14 @@
                         <span class="action-text">חייג</span>
                     </a>
                 </div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
     }
 
-    function getVCardData(c) {
-        return [
+    // פונקציית השמירה החדשה והיציבה
+    function downloadVCard(idx) {
+        const c = allContacts[idx];
+        const vcardText = [
             'BEGIN:VCARD',
             'VERSION:3.0',
             `FN;CHARSET=UTF-8:${c.name}`,
@@ -194,6 +200,19 @@
             `TITLE;CHARSET=UTF-8:${c.role}`,
             'END:VCARD'
         ].join('\n');
+
+        const blob = new Blob([vcardText], { type: 'text/vcard;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.href = url;
+        link.setAttribute('download', `${c.name.replace(/\s+/g, '_')}.vcf`);
+        document.body.appendChild(link);
+        link.click();
+        
+        // ניקוי זיכרון
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
     }
 
     function updateDropdowns() {
