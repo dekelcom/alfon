@@ -74,7 +74,7 @@
 
 <div class="header-section">
     
-    <div class="version-tag">V 2.1.0</div>
+    <div class="version-tag">V 2.1.1</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -83,7 +83,7 @@
     <div class="flex-row">
         <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()" class="flex-grow">
         <button onclick="resetAll()" class="btn-top">נקה</button>
-        <button onclick="loadData(true)" class="btn-action" style="padding: 0 10px; background: #eee; border: 1px solid #ccc; border-radius: 8px; cursor: pointer;">🔄</button>
+        <button onclick="loadData(true)" class="btn-action" style="padding: 0 10px; background: #eee; border: 1px solid #ccc; border-radius: 8px; cursor: pointer;">♻️♻️</button>
     </div>
     <div class="flex-row">
         <select id="companyFilter" onchange="handleCompanyChange()" class="flex-grow">
@@ -134,77 +134,4 @@
             'END:VCARD'
         ].join('\n');
         
-        // קידוד Base64 עוזר לספארי להבין שמדובר בקובץ בינארי להורדה
-        const base64Vcard = btoa(unescape(encodeURIComponent(vcard)));
-        return 'data:text/vcard;base64,' + base64Vcard;
-    }
 
-    function renderContacts(list) {
-        const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = list.map(c => `
-            <div class="contact-card">
-                <div>
-                    <div class="name-header">${c.name}</div>
-                    <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
-                    <div class="phone-sub-name">${c.mobile}</div>
-                </div>
-                <div class="card-actions">
-                    <a href="${getVCardHref(c)}" download="${c.name}.vcf" class="action-link">
-                        <img src="contact.png" class="action-icon">
-                        <span class="action-text">שמירה</span>
-                    </a>
-                    <a href="https://wa.me/${c.mobile.replace(/\D/g, '')}" target="_blank" class="action-link">
-                        <img src="whatsapp.png" class="action-icon">
-                        <span class="action-text">הודעה</span>
-                    </a>
-                    <a href="tel:${c.mobile}" class="action-link">
-                        <img src="phone-call.png" class="action-icon">
-                        <span class="action-text">חייג</span>
-                    </a>
-                </div>
-            </div>`).join('');
-    }
-
-    function updatePlugaDropdown() {
-        const pSel = document.getElementById('companyFilter');
-        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
-        pSel.innerHTML = '<option value="">כל הפלוגות</option>' + plugot.map(p => `<option value="${p}">${p}</option>`).join('');
-    }
-
-    function handleCompanyChange() {
-        const pVal = document.getElementById('companyFilter').value;
-        const fSel = document.getElementById('unitFilter');
-        if (pVal) {
-            fSel.disabled = false;
-            const frames = [...new Set(allContacts.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
-            fSel.innerHTML = '<option value="">כל המסגרות</option>' + frames.map(f => `<option value="${f}">${f}</option>`).join('');
-        } else {
-            fSel.disabled = true; fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        }
-        filterContacts();
-    }
-
-    function filterContacts() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const p = document.getElementById('companyFilter').value;
-        const f = document.getElementById('unitFilter').value;
-        const res = allContacts.filter(c => 
-            (!term || c.searchKey.includes(term)) && 
-            (!p || c.pluga === p) && 
-            (!f || c.framework === f)
-        );
-        renderContacts(res);
-    }
-
-    function resetAll() {
-        document.getElementById('searchInput').value = "";
-        document.getElementById('companyFilter').value = "";
-        document.getElementById('unitFilter').disabled = true;
-        renderContacts(allContacts);
-    }
-
-    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) document.getElementById('iosBanner').style.display = 'block';
-    loadData();
-</script>
-</body>
-</html>
