@@ -101,25 +101,34 @@
     let allContacts = [];
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
 
-    function loadData() {
-        fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
-            Papa.parse(txt, {
-                header: true, skipEmptyLines: true,
-                complete: function(results) {
-                    allContacts = results.data.map(row => ({
-                        name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
-                        pluga: (row.pluga || '').trim(),
-                        framework: (row.framework || '').trim(),
-                        role: (row.role || '').trim(),
-                        mobile: (row.mobile || '').trim(),
-                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
-                    })).filter(c => c.name && c.mobile);
-                    updatePlugaDropdown();
-                    renderContacts(allContacts);
-                }
-            });
-        });
+    function loadData(isRefresh = false) {
+    // אם המשתמש לחץ על רענן, נציג הודעה זמנית על המסך
+    if (isRefresh) {
+        document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">מרענן נתונים...</div>';
     }
+
+    fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
+        Papa.parse(txt, {
+            header: true, skipEmptyLines: true,
+            complete: function(results) {
+                allContacts = results.data.map(row => ({
+                    // הוספת הנתונים מה-CSV למערך אנשי הקשר
+                    firstName: (row.firstName || '').trim(),
+                    lastName: (row.lastName || '').trim(),
+                    name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
+                    pluga: (row.pluga || '').trim(),
+                    framework: (row.framework || '').trim(),
+                    role: (row.role || '').trim(),
+                    mobile: (row.mobile || '').trim(),
+                    searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
+                })).filter(c => c.name && c.mobile);
+                
+                updateDropdowns(); // עדכון רשימות הסינון
+                renderContacts(allContacts); // הצגת אנשי הקשר המעודכנים
+            }
+        });
+    });
+}
 
     // פונקציית יצירת VCard משופרת לאייפון
     function getVCardHref(c) {
