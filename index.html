@@ -58,14 +58,43 @@
         .phone-display { font-size: 0.9rem; font-weight: bold; margin: 8px 0; color: #000; direction: ltr; display: block; }
 
         .banner { display: none; padding: 10px; text-align: center; font-weight: bold; background: #e1f5fe; border-bottom: 2px solid #03a9f4; font-size: 0.85rem; }
-    </style>
+    		/* עיצוב אחיד למחשב ולמובייל */
+				select {
+				    -webkit-appearance: none; /* ביטול עיצוב ברירת מחדל של כרום/ספארי */
+				    -moz-appearance: none;    /* ביטול עיצוב ברירת מחדל של פיירפוקס */
+				    appearance: none;
+				    
+				    /* הוספת חץ מעוצב - וקטורי (SVG) */
+				    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237c4535' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+				    background-repeat: no-repeat;
+				    background-position: left 12px center; /* מיקום החץ בשמאל */
+				    background-size: 16px;
+				    
+				    padding-left: 35px !important; /* רווח בשמאל כדי שהטקסט לא יתנגש בחץ */
+				    cursor: pointer;
+				}
+				
+				/* הסרת המסגרת הכחולה המכוערת שמופיעה לפעמים במחשב כשלוחצים */
+				select:focus {
+				    outline: none;
+				    border-color: var(--pakar-main);
+				    box-shadow: 0 0 0 2px rgba(124, 69, 53, 0.1);
+				}
+				
+				/* במחשב בלבד - הוספת צבע רקע קל במעבר עכבר */
+				@media (hover: hover) {
+				    select:hover {
+				        background-color: #f0f0f0;
+				    }
+				}
+		</style>
 </head>
 <body>
 
 <div id="iosBanner" class="banner">אייפון: לחץ שיתוף ואז "הוסף למסך הבית"</div>
 
 <div class="header-section">
-    <div class="version-tag">V 2.1.5</div>
+    <div class="version-tag">V 2.1.6</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
