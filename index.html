@@ -6,25 +6,22 @@
     <title>אלפון גדוד 882</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <script src="vcard.js"></script> 
     
     <style>
         :root { --pakar-main: #7c4535; --pakar-bg: #f8f9fa; }
         body { background-color: var(--pakar-bg); font-family: system-ui, sans-serif; margin: 0; padding: 0; }
         
-        /* הצגת מספר גרסה בולטת */
-        .version-tag { 
-            position: absolute; top: 10px; left: 15px; 
-            font-size: 0.75rem; color: #777; font-weight: bold; 
-            background: #eee; padding: 2px 8px; border-radius: 4px;
-        }
+        .version-tag { position: absolute; top: 5px; left: 10px; font-size: 0.65rem; color: #999; font-weight: bold; }
         
-        .container { 
-            background: white; padding: 20px 15px 15px; border-bottom: 3px solid #d14a24; 
-            text-align: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .header-section { text-align: center; padding: 15px 10px 10px; background: white; border-bottom: 2px solid #d14a24; position: relative; }
+        .unit-logo { width: 45px; height: auto; }
+
+        .search-container { 
+            position: sticky; top: 0; background: var(--pakar-bg); 
+            z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        
-        .flex-row { display: flex; gap: 8px; margin-top: 10px; }
+
+        .flex-row { display: flex; gap: 6px; margin-bottom: 8px; }
         .flex-grow { flex: 1; min-width: 0; }
 
         input, select { 
@@ -32,41 +29,59 @@
             font-size: 16px !important; width: 100%; box-sizing: border-box; background: white;
         }
 
-        .btn-clear { background: #f0f0f0; border: 1px solid #ccc; border-radius: 8px; padding: 0 15px; font-weight: bold; cursor: pointer; color: #333; }
+        .btn-top { 
+            background: white; border: 1px solid #ccc; border-radius: 8px; 
+            padding: 0 15px; font-weight: bold; color: var(--pakar-main); cursor: pointer;
+        }
 
-        .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; align-items: start; }
+        .contacts-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            padding: 12px;
+            align-items: start;
+        }
         @media (min-width: 900px) { .contacts-grid { grid-template-columns: repeat(4, 1fr); } }
 
         .contact-card { 
             background: white; border-radius: 12px; padding: 15px 8px; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1); text-align: center;
-            display: flex; flex-direction: column; height: 100%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+            display: flex; flex-direction: column; 
+            text-align: center;
         }
 
         .name-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 2px; color: #000; }
-        .phone-display { font-size: 1.1rem; font-weight: bold; display: block; direction: ltr; margin-bottom: 8px; color: #000; }
-        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; min-height: 40px; }
+                
+        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; }
         
         .card-actions { display: flex; border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; }
-        .action-item { 
+        .action-link { 
             flex: 1; text-decoration: none !important; color: #333 !important; 
             display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            background: none; border: none; font-family: inherit;
         }
         .action-icon { width: 28px; height: 28px; margin-bottom: 4px; }
         .action-text { font-size: 0.7rem; font-weight: bold; }
+
+        /* מספר הנייד מתחת לשם - באותו פונט וגודל */
+        .phone-sub-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; color: #000; direction: ltr; display: block; }
+
+        .banner { display: none; padding: 10px; text-align: center; font-weight: bold; background: #e1f5fe; border-bottom: 2px solid #03a9f4; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="version-tag">V 2.0.2</div>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" style="width:45px">
-    <h3 style="margin:8px 0 0">אלפון גדוד 882</h3>
-    
+<div id="iosBanner" class="banner">אייפון: לחץ שיתוף ואז "הוסף למסך הבית"</div>
+
+<div class="header-section">
+    <div class="version-tag">V 1.2.48</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
+    <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
+</div>
+
+<div class="search-container">
     <div class="flex-row">
-        <input type="text" id="searchInput" placeholder="חיפוש חופשי..." oninput="filterContacts()" class="flex-grow">
-        <button onclick="resetAll()" class="btn-clear">נקה</button>
+        <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()" class="flex-grow">
+        <button onclick="resetAll()" class="btn-top">נקה</button>
     </div>
     <div class="flex-row">
         <select id="companyFilter" onchange="handleCompanyChange()" class="flex-grow">
@@ -78,9 +93,7 @@
     </div>
 </div>
 
-<div id="contactsGrid" class="contacts-grid">
-    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">טוען נתונים...</div>
-</div>
+<div id="contactsGrid" class="contacts-grid"></div>
 
 <script>
     let allContacts = [];
@@ -92,77 +105,65 @@
                 header: true, skipEmptyLines: true,
                 complete: function(results) {
                     allContacts = results.data.map(row => ({
-                        firstName: (row.firstName || '').trim(),
-                        lastName: (row.lastName || '').trim(),
                         name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
                         role: (row.role || '').trim(),
                         mobile: (row.mobileE164 || '').trim(),
-                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework}`.toLowerCase()
+                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobileE164}`.toLowerCase()
                     })).filter(c => c.name && c.mobile);
-                    updateDropdowns();
+                    updatePlugaDropdown();
                     renderContacts(allContacts);
                 }
             });
         });
     }
 
-    // הפונקציה שמשתמשת בספרייה vcard.js שהוספת
-    function exportToContacts(idx) {
-        const c = allContacts[idx];
-        try {
-            // יצירת הכרטיס באמצעות ה-context של vcard.js
-            var myCard = vCard.create(vCard.Version.THREE);
-            myCard.addName(c.lastName, c.firstName);
-            myCard.addPhone(c.mobile, vCard.Type.CELL);
-            myCard.addOrganization(c.pluga + " - " + c.framework);
-            myCard.addTitle(c.role);
-            
-            // הפעלה של פונקציית ה-export מהספרייה
-            vCard.export(myCard, c.name, true);
-        } catch (err) {
-            console.error("שגיאה בייצוא איש קשר:", err);
-            alert("חלה שגיאה בשמירה. וודא שקובץ vcard.js נטען כראוי.");
-        }
+    // פונקציית יצירת VCard משופרת לאייפון
+    function getVCardHref(c) {
+        const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `FN;CHARSET=UTF-8:${c.name}`,
+            `N;CHARSET=UTF-8:;${c.name};;;`,
+            `TEL;TYPE=CELL:${c.mobile}`,
+            `ORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}`,
+            `TITLE;CHARSET=UTF-8:${c.role}`,
+            'END:VCARD'
+        ].join('\n');
+        
+        // קידוד Base64 עוזר לספארי להבין שמדובר בקובץ בינארי להורדה
+        const base64Vcard = btoa(unescape(encodeURIComponent(vcard)));
+        return 'data:text/vcard;base64,' + base64Vcard;
     }
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        if (list.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px;">אין תוצאות</div>';
-            return;
-        }
-        grid.innerHTML = list.map((c, index) => {
-            // מציאת האינדקס האמיתי במערך המקור לצורך השמירה
-            const originalIndex = allContacts.indexOf(c);
-            return `
+        grid.innerHTML = list.map(c => `
             <div class="contact-card">
                 <div>
                     <div class="name-header">${c.name}</div>
-                    <div class="phone-display">${c.mobile}</div>
+                    <div class="phone-sub-name">${c.mobile}</div>
                     <div class="info-sub">${c.pluga} • ${c.framework}<br>${c.role}</div>
                 </div>
                 <div class="card-actions">
-                    <button onclick="exportToContacts(${originalIndex})" class="action-item">
+                    <a href="${getVCardHref(c)}" download="${c.name}.vcf" class="action-link">
                         <img src="contact.png" class="action-icon">
                         <span class="action-text">שמירה</span>
-                    </button>
-                    <a href="https://wa.me/${c.mobile.replace(/\D/g, '')}" target="_blank" class="action-item">
+                    </a>
+                    <a href="https://wa.me/${c.mobile.replace(/\D/g, '')}" target="_blank" class="action-link">
                         <img src="whatsapp.png" class="action-icon">
                         <span class="action-text">הודעה</span>
                     </a>
-                    <a href="tel:${c.mobile}" class="action-item">
+                    <a href="tel:${c.mobile}" class="action-link">
                         <img src="phone-call.png" class="action-icon">
                         <span class="action-text">חייג</span>
                     </a>
                 </div>
-            </div>`;
-        }).join('');
+            </div>`).join('');
     }
 
-    // ניהול דרופדאונים וסינונים
-    function updateDropdowns() {
+    function updatePlugaDropdown() {
         const pSel = document.getElementById('companyFilter');
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
         pSel.innerHTML = '<option value="">כל הפלוגות</option>' + plugot.map(p => `<option value="${p}">${p}</option>`).join('');
@@ -185,18 +186,22 @@
         const term = document.getElementById('searchInput').value.toLowerCase();
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
-        const res = allContacts.filter(c => (!term || c.searchKey.includes(term)) && (!p || c.pluga === p) && (!f || c.framework === f));
+        const res = allContacts.filter(c => 
+            (!term || c.searchKey.includes(term)) && 
+            (!p || c.pluga === p) && 
+            (!f || c.framework === f)
+        );
         renderContacts(res);
     }
 
     function resetAll() {
         document.getElementById('searchInput').value = "";
         document.getElementById('companyFilter').value = "";
-        document.getElementById('unitFilter').value = "";
         document.getElementById('unitFilter').disabled = true;
         renderContacts(allContacts);
     }
 
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) document.getElementById('iosBanner').style.display = 'block';
     loadData();
 </script>
 </body>
