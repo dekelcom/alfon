@@ -74,7 +74,7 @@
 
 <div class="header-section">
     
-    <div class="version-tag">V 2.1.2</div>
+    <div class="version-tag">V 2.1.3</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -102,17 +102,18 @@
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
 
     function loadData(isRefresh = false) {
-    // אם המשתמש לחץ על רענן, נציג הודעה זמנית על המסך
+    // חיווי ויזואלי למשתמש שהרענון התחיל
     if (isRefresh) {
-        document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">מרענן נתונים...</div>';
+        const grid = document.getElementById('contactsGrid');
+        if (grid) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">מרענן נתונים...</div>';
     }
 
     fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
         Papa.parse(txt, {
-            header: true, skipEmptyLines: true,
+            header: true, 
+            skipEmptyLines: true,
             complete: function(results) {
                 allContacts = results.data.map(row => ({
-                    // הוספת הנתונים מה-CSV למערך אנשי הקשר
                     firstName: (row.firstName || '').trim(),
                     lastName: (row.lastName || '').trim(),
                     name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
@@ -122,11 +123,20 @@
                     mobile: (row.mobile || '').trim(),
                     searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
                 })).filter(c => c.name && c.mobile);
-                
-                updateDropdowns(); // עדכון רשימות הסינון
-                renderContacts(allContacts); // הצגת אנשי הקשר המעודכנים
+
+                // תיקון: קריאה לפונקציית עדכון הדרופדאונים הנכונה
+                if (typeof updateDropdowns === "function") {
+                    updateDropdowns();
+                } else if (typeof updatePlugaDropdown === "function") {
+                    updatePlugaDropdown();
+                }
+
+                renderContacts(allContacts);
             }
         });
+    }).catch(err => {
+        console.error("שגיאה בטעינת הנתונים:", err);
+        document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red;">שגיאה בטעינת נתונים. בדוק חיבור לאינטרנט.</div>';
     });
 }
 
