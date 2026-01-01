@@ -8,115 +8,68 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     
     <style>
-        :root { --pakar-main: #7c4535; --pakar-bg: #f8f9fa; }
-        body { background-color: var(--pakar-bg); font-family: system-ui, sans-serif; margin: 0; padding: 0; }
+        :root { --pakar-main: #7c4535; --pakar-bg: #f8f9fa; --pakar-dark: #2d2d2d; }
+        body { background-color: var(--pakar-bg); font-family: system-ui, sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         
-        .version-tag { position: absolute; top: 5px; left: 10px; font-size: 0.8rem; color: #999; font-weight: bold; }
+        /* ניהול מסכים */
+        .screen { display: none; min-height: 100vh; width: 100%; }
+        .screen.active { display: block; }
+
+        .version-tag { position: absolute; top: 5px; left: 10px; font-size: 0.7rem; color: #999; }
         
         .header-section { text-align: center; padding: 15px 10px 10px; background: white; border-bottom: 2px solid #d14a24; position: relative; }
         .unit-logo { width: 45px; height: auto; }
 
-        .search-container { 
-            position: sticky; top: 0; background: var(--pakar-bg); 
-            z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
+        .search-container { position: sticky; top: 0; background: var(--pakar-bg); z-index: 100; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .flex-row { display: flex; gap: 6px; margin-bottom: 8px; }
         .flex-grow { flex: 1; min-width: 0; }
 
-        input, select { 
-            padding: 12px; border: 1px solid #ccc; border-radius: 8px; 
-            font-size: 16px !important; width: 100%; box-sizing: border-box; background: white;
-        }
+        input, select { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px !important; width: 100%; box-sizing: border-box; background: white; }
 
-        .btn-top { 
-            background: white; border: 1px solid #ccc; border-radius: 8px; 
-            padding: 0 10px; font-weight: bold; color: var(--pakar-main); cursor: pointer;
-        }
-
-        .contacts-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; align-items: start;
-        }
+        /* כרטיסים */
+        .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         @media (min-width: 900px) { .contacts-grid { grid-template-columns: repeat(4, 1fr); } }
 
-        .contact-card { 
-            background: white; border-radius: 12px; padding: 15px 8px; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center;
-        }
-
+        .contact-card { background: white; border-radius: 12px; padding: 15px 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center; cursor: pointer; }
         .name-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #000; }
-        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; min-height: 55px; }
-        
-        .card-actions { display: flex; border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; }
-        .action-link { 
-            flex: 1; text-decoration: none !important; color: #333 !important; 
-            display: flex; flex-direction: column; align-items: center; cursor: pointer;
-        }
-        .action-icon { width: 28px; height: 28px; margin-bottom: 4px; }
-        .action-text { font-size: 0.7rem; font-weight: bold; }
+        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 8px; line-height: 1.4; }
 
-        .phone-display { font-size: 0.9rem; font-weight: bold; margin: 8px 0; color: #000; direction: ltr; display: block; }
+        /* כפתור הוספה צף */
+        .fab { position: fixed; bottom: 20px; left: 20px; width: 56px; height: 56px; background: #d14a24; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: none; cursor: pointer; z-index: 999; }
 
-        .banner { display: none; padding: 10px; text-align: center; font-weight: bold; background: #e1f5fe; border-bottom: 2px solid #03a9f4; font-size: 0.85rem; }
-    		/* עיצוב אחיד למחשב ולמובייל */
-				select {
-				    -webkit-appearance: none; /* ביטול עיצוב ברירת מחדל של כרום/ספארי */
-				    -moz-appearance: none;    /* ביטול עיצוב ברירת מחדל של פיירפוקס */
-				    appearance: none;
-				    
-				    /* הוספת חץ מעוצב - וקטורי (SVG) */
-				    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237c4535' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-				    background-repeat: no-repeat;
-				    background-position: left 12px center; /* מיקום החץ בשמאל */
-				    background-size: 16px;
-				    
-				    padding-left: 35px !important; /* רווח בשמאל כדי שהטקסט לא יתנגש בחץ */
-				    cursor: pointer;
-				}
-				
-				/* הסרת המסגרת הכחולה המכוערת שמופיעה לפעמים במחשב כשלוחצים */
-				select:focus {
-				    outline: none;
-				    border-color: var(--pakar-main);
-				    box-shadow: 0 0 0 2px rgba(124, 69, 53, 0.1);
-				}
-				
-				/* במחשב בלבד - הוספת צבע רקע קל במעבר עכבר */
-				@media (hover: hover) {
-				    select:hover {
-				        background-color: #f0f0f0;
-				    }
-				}
-		</style>
+        /* מסך פרופיל */
+        .profile-header { background: var(--pakar-dark); color: white; padding: 40px 20px; text-align: center; position: relative; }
+        .back-btn { position: absolute; top: 20px; right: 20px; background: none; border: 1px solid white; color: white; border-radius: 20px; padding: 5px 15px; }
+        .profile-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 20px; }
+        .big-action-btn { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: black; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; font-size: 0.9rem; border: none; }
+    </style>
 </head>
 <body>
 
-<div id="iosBanner" class="banner">אייפון: לחץ שיתוף ואז "הוסף למסך הבית"</div>
+<div id="mainScreen" class="screen active">
+    <div class="header-section">
+        <div class="version-tag">V 3.1.0</div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
+        <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
+    </div>
 
-<div class="header-section">
-    <div class="version-tag">V 3.0.0</div>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
-    <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
+    <div class="search-container">
+        <div class="flex-row">
+            <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()" class="flex-grow">
+            <button onclick="loadData(true)" style="width: auto; padding: 0 10px;">🔄</button>
+        </div>
+        <div class="flex-row">
+            <select id="companyFilter" onchange="handleCompanyChange()" class="flex-grow"><option value="">פלוגה</option></select>
+            <select id="unitFilter" onchange="filterContacts()" class="flex-grow" disabled><option value="">מסגרת</option></select>
+        </div>
+    </div>
+
+    <div id="contactsGrid" class="contacts-grid"></div>
+    <button class="fab" onclick="alert('מסך הוספה ייבנה בשלב הבא')">+</button>
 </div>
 
-<div class="search-container">
-    <div class="flex-row">
-        <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()" class="flex-grow">
-        <button onclick="resetAll()" class="btn-top">נקה</button>
-        <button onclick="loadData(true)" class="btn-top">רענן</button>
-    </div>
-    <div class="flex-row">
-        <select id="companyFilter" onchange="handleCompanyChange()" class="flex-grow">
-            <option value="">כל הפלוגות</option>
-        </select>
-        <select id="unitFilter" onchange="filterContacts()" class="flex-grow" disabled>
-            <option value="">כל המסגרות</option>
-        </select>
-    </div>
-</div>
-
-<div id="contactsGrid" class="contacts-grid">
-    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">טוען נתונים...</div>
+<div id="profileScreen" class="screen">
+    <div id="profileContent"></div>
 </div>
 
 <script>
@@ -124,18 +77,11 @@
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
 
     function loadData(isRefresh = false) {
-        if (isRefresh) {
-            document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">מרענן נתונים...</div>';
-        }
-
         fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
-                header: true, 
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: function(results) {
                     allContacts = results.data.map(row => ({
-                        firstName: (row.firstName || '').trim(),
-                        lastName: (row.lastName || '').trim(),
                         name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
@@ -143,115 +89,91 @@
                         mobile: (row.mobile || '').trim(),
                         searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
                     })).filter(c => c.name && c.mobile);
-
                     updateDropdowns();
                     renderContacts(allContacts);
                 }
             });
-        }).catch(err => {
-            document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red;">שגיאה בטעינה</div>';
         });
     }
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        if (list.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px;">אין תוצאות</div>';
-            return;
-        }
-        grid.innerHTML = list.map(c => {
-            // יצירת מזהה ייחודי לכל איש קשר לצורך השמירה
-            const contactId = allContacts.indexOf(c);
-            return `
-            <div class="contact-card">
-                <div>
-                    <div class="name-header">${c.name}</div>
-                    <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
-                    <div class="phone-display">${c.mobile}</div>
-                </div>
-                <div class="card-actions">
-                    <button onclick="downloadVCard(${contactId})" class="action-link" style="background:none; border:none; width:100%;">
-                        <img src="contact.png" class="action-icon">
-                        <span class="action-text">שמירה</span>
-                    </button>
-                    <a href="https://wa.me/${c.mobile.replace(/\D/g, '')}" target="_blank" class="action-link">
-                        <img src="whatsapp.png" class="action-icon">
-                        <span class="action-text">הודעה</span>
-                    </a>
-                    <a href="tel:${c.mobile}" class="action-link">
-                        <img src="phone-call.png" class="action-icon">
-                        <span class="action-text">חייג</span>
-                    </a>
-                </div>
-            </div>`;
-        }).join('');
+        grid.innerHTML = list.map((c, idx) => `
+            <div class="contact-card" onclick="openProfile(${allContacts.indexOf(c)})">
+                <div class="name-header">${c.name}</div>
+                <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
+                <div style="font-weight:bold; color: #d14a24;">פרטים נוספים ></div>
+            </div>
+        `).join('');
     }
 
-    // פונקציית השמירה החדשה והיציבה
+    function openProfile(idx) {
+        const c = allContacts[idx];
+        const profileContent = document.getElementById('profileContent');
+        
+        profileContent.innerHTML = `
+            <div class="profile-header">
+                <button class="back-btn" onclick="showScreen('mainScreen')">חזור</button>
+                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 10px;">${c.name}</div>
+                <div>${c.role}</div>
+                <div>${c.pluga} - ${c.framework}</div>
+            </div>
+            <div class="profile-actions">
+                <a href="tel:${c.mobile}" class="big-action-btn">📞<br>חיוג</a>
+                <button onclick="openWhatsApp('${c.mobile}')" class="big-action-btn">💬<br>הודעה</button>
+                <button onclick="downloadVCard(${idx})" class="big-action-btn">💾<br>שמירה</button>
+            </div>
+            <div style="padding: 20px; text-align: center;">
+                <button onclick="alert('טופס עדכון ייבנה בשלב הבא')" style="background:none; border: 1px solid #ccc; padding: 10px; border-radius: 8px;">דווח על טעות בפרטים</button>
+            </div>
+        `;
+        showScreen('profileScreen');
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function openWhatsApp(mobile) {
+        const cleanPhone = mobile.replace(/\D/g, '');
+        window.open(`https://wa.me/${cleanPhone}`, '_blank');
+    }
+
     function downloadVCard(idx) {
         const c = allContacts[idx];
-        const vcardText = [
-            'BEGIN:VCARD',
-            'VERSION:3.0',
-            `FN;CHARSET=UTF-8:${c.name}`,
-            `N;CHARSET=UTF-8:;${c.name};;;`,
-            `TEL;TYPE=CELL:${c.mobile}`,
-            `ORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}`,
-            `TITLE;CHARSET=UTF-8:${c.role}`,
-            'END:VCARD'
-        ].join('\n');
-
-        const blob = new Blob([vcardText], { type: 'text/vcard;charset=utf-8' });
+        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name}\nTEL;TYPE=CELL:${c.mobile}\nORG:${c.pluga} - ${c.framework}\nTITLE:${c.role}\nEND:VCARD`;
+        const blob = new Blob([vcard], { type: 'text/vcard' });
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        
-        link.href = url;
-        link.setAttribute('download', `${c.name.replace(/\s+/g, '_')}.vcf`);
-        document.body.appendChild(link);
-        link.click();
-        
-        // ניקוי זיכרון
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${c.name}.vcf`;
+        a.click();
     }
 
+    // פונקציות פילטר (נשארו זהות)
     function updateDropdowns() {
         const pSel = document.getElementById('companyFilter');
         const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
-        pSel.innerHTML = '<option value="">כל הפלוגות</option>' + plugot.map(p => `<option value="${p}">${p}</option>`).join('');
+        pSel.innerHTML = '<option value="">פלוגה</option>' + plugot.map(p => `<option value="${p}">${p}</option>`).join('');
     }
-
     function handleCompanyChange() {
         const pVal = document.getElementById('companyFilter').value;
         const fSel = document.getElementById('unitFilter');
         if (pVal) {
             fSel.disabled = false;
             const frames = [...new Set(allContacts.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
-            fSel.innerHTML = '<option value="">כל המסגרות</option>' + frames.map(f => `<option value="${f}">${f}</option>`).join('');
-        } else {
-            fSel.disabled = true; fSel.innerHTML = '<option value="">כל המסגרות</option>';
-        }
+            fSel.innerHTML = '<option value="">מסגרת</option>' + frames.map(f => `<option value="${f}">${f}</option>`).join('');
+        } else { fSel.disabled = true; fSel.innerHTML = '<option value="">מסגרת</option>'; }
         filterContacts();
     }
-
     function filterContacts() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
-        const res = allContacts.filter(c => 
-            (!term || c.searchKey.includes(term)) && 
-            (!p || c.pluga === p) && 
-            (!f || c.framework === f)
-        );
+        const res = allContacts.filter(c => (!term || c.searchKey.includes(term)) && (!p || c.pluga === p) && (!f || c.framework === f));
         renderContacts(res);
-    }
-
-    function resetAll() {
-        document.getElementById('searchInput').value = "";
-        document.getElementById('companyFilter').value = "";
-        document.getElementById('unitFilter').value = "";
-        document.getElementById('unitFilter').disabled = true;
-        renderContacts(allContacts);
     }
 
     loadData();
