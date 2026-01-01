@@ -10,91 +10,36 @@
     <style>
         :root { --pakar-main: #7c4535; --pakar-bg: #f8f9fa; }
         body { background-color: var(--pakar-bg); font-family: system-ui, sans-serif; margin: 0; padding: 0; }
-        
         .version-tag { position: absolute; top: 5px; left: 10px; font-size: 0.8rem; color: #999; font-weight: bold; }
-        
         .header-section { text-align: center; padding: 15px 10px 10px; background: white; border-bottom: 2px solid #d14a24; position: relative; }
         .unit-logo { width: 45px; height: auto; }
-
-        .search-container { 
-            position: sticky; top: 0; background: var(--pakar-bg); 
-            z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
+        .search-container { position: sticky; top: 0; background: var(--pakar-bg); z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .flex-row { display: flex; gap: 6px; margin-bottom: 8px; }
-        .flex-grow { flex: 1; min-width: 0; }
-
-        input, select { 
-            padding: 12px; border: 1px solid #ccc; border-radius: 8px; 
-            font-size: 16px !important; width: 100%; box-sizing: border-box; background: white;
-        }
-
-        .btn-top { 
-            background: white; border: 1px solid #ccc; border-radius: 8px; 
-            padding: 0 10px; font-weight: bold; color: var(--pakar-main); cursor: pointer;
-        }
-
-        .contacts-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; align-items: start;
-        }
+        input, select { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px !important; width: 100%; box-sizing: border-box; background: white; }
+        .btn-top { background: white; border: 1px solid #ccc; border-radius: 8px; padding: 0 10px; font-weight: bold; color: var(--pakar-main); cursor: pointer; }
+        .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; align-items: start; }
         @media (min-width: 900px) { .contacts-grid { grid-template-columns: repeat(4, 1fr); } }
-
-        .contact-card { 
-            background: white; border-radius: 12px; padding: 15px 8px; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center;
-        }
-
+        .contact-card { background: white; border-radius: 12px; padding: 15px 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center; }
         .name-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #000; }
         .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; min-height: 55px; }
-        
         .card-actions { display: flex; border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; }
-        .action-link { 
-            flex: 1; text-decoration: none !important; color: #333 !important; 
-            display: flex; flex-direction: column; align-items: center; cursor: pointer;
-        }
+        .action-link { flex: 1; text-decoration: none !important; color: #333 !important; display: flex; flex-direction: column; align-items: center; cursor: pointer; background: none; border: none; }
         .action-icon { width: 28px; height: 28px; margin-bottom: 4px; }
         .action-text { font-size: 0.7rem; font-weight: bold; }
-
         .phone-display { font-size: 0.9rem; font-weight: bold; margin: 8px 0; color: #000; direction: ltr; display: block; }
-
-        .banner { display: none; padding: 10px; text-align: center; font-weight: bold; background: #e1f5fe; border-bottom: 2px solid #03a9f4; font-size: 0.85rem; }
-    		/* עיצוב אחיד למחשב ולמובייל */
-				select {
-				    -webkit-appearance: none; /* ביטול עיצוב ברירת מחדל של כרום/ספארי */
-				    -moz-appearance: none;    /* ביטול עיצוב ברירת מחדל של פיירפוקס */
-				    appearance: none;
-				    
-				    /* הוספת חץ מעוצב - וקטורי (SVG) */
-				    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237c4535' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-				    background-repeat: no-repeat;
-				    background-position: left 12px center; /* מיקום החץ בשמאל */
-				    background-size: 16px;
-				    
-				    padding-left: 35px !important; /* רווח בשמאל כדי שהטקסט לא יתנגש בחץ */
-				    cursor: pointer;
-				}
-				
-				/* הסרת המסגרת הכחולה המכוערת שמופיעה לפעמים במחשב כשלוחצים */
-				select:focus {
-				    outline: none;
-				    border-color: var(--pakar-main);
-				    box-shadow: 0 0 0 2px rgba(124, 69, 53, 0.1);
-				}
-				
-				/* במחשב בלבד - הוספת צבע רקע קל במעבר עכבר */
-				@media (hover: hover) {
-				    select:hover {
-				        background-color: #f0f0f0;
-				    }
-				}
-		</style>
+        
+        select {
+            -webkit-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237c4535' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: left 12px center; background-size: 16px;
+            padding-left: 35px !important;
+        }
+    </style>
 </head>
 <body>
 
-<div id="iosBanner" class="banner">אייפון: לחץ שיתוף ואז "הוסף למסך הבית"</div>
-
 <div class="header-section">
-    <div class="version-tag">V 2.1.6</div>
+    <div class="version-tag">V 2.1.7</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -115,27 +60,20 @@
     </div>
 </div>
 
-<div id="contactsGrid" class="contacts-grid">
-    <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">טוען נתונים...</div>
-</div>
+<div id="contactsGrid" class="contacts-grid"></div>
 
 <script>
     let allContacts = [];
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
 
     function loadData(isRefresh = false) {
-        if (isRefresh) {
-            document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">מרענן נתונים...</div>';
-        }
+        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">מרענן...</div>';
 
         fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
-                header: true, 
-                skipEmptyLines: true,
+                header: true, skipEmptyLines: true,
                 complete: function(results) {
                     allContacts = results.data.map(row => ({
-                        firstName: (row.firstName || '').trim(),
-                        lastName: (row.lastName || '').trim(),
                         name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
@@ -143,57 +81,53 @@
                         mobile: (row.mobile || '').trim(),
                         searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
                     })).filter(c => c.name && c.mobile);
-
                     updateDropdowns();
                     renderContacts(allContacts);
                 }
             });
-        }).catch(err => {
-            document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: red;">שגיאה בטעינה</div>';
         });
     }
 
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
-        if (list.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px;">אין תוצאות</div>';
-            return;
-        }
-        grid.innerHTML = list.map(c => `
+        grid.innerHTML = list.map((c, idx) => `
             <div class="contact-card">
-                <div>
-                    <div class="name-header">${c.name}</div>
-                    <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
-                    <div class="phone-display">${c.mobile}</div>
-                </div>
+                <div class="name-header">${c.name}</div>
+                <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
+                <div class="phone-display">${c.mobile}</div>
                 <div class="card-actions">
-                    <a href="data:text/vcard;charset=utf-8,${encodeURIComponent(getVCardData(c))}" download="${c.name}.vcf" class="action-link">
-                        <img src="contact.png" class="action-icon">
+                    <button onclick="saveVCard(${allContacts.indexOf(c)})" class="action-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/8065/8065067.png" class="action-icon">
                         <span class="action-text">שמירה</span>
-                    </a>
-                    <a href="https://wa.me/${c.mobile.replace(/\D/g, '')}" target="_blank" class="action-link">
-                        <img src="whatsapp.png" class="action-icon">
+                    </button>
+                    <button onclick="openWA('${c.mobile}')" class="action-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
                         <span class="action-text">הודעה</span>
-                    </a>
+                    </button>
                     <a href="tel:${c.mobile}" class="action-link">
-                        <img src="phone-call.png" class="action-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon">
                         <span class="action-text">חייג</span>
                     </a>
                 </div>
             </div>`).join('');
     }
 
-    function getVCardData(c) {
-        return [
-            'BEGIN:VCARD',
-            'VERSION:3.0',
-            `FN;CHARSET=UTF-8:${c.name}`,
-            `N;CHARSET=UTF-8:;${c.name};;;`,
-            `TEL;TYPE=CELL:${c.mobile}`,
-            `ORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}`,
-            `TITLE;CHARSET=UTF-8:${c.role}`,
-            'END:VCARD'
-        ].join('\n');
+    function openWA(mobile) {
+        let clean = mobile.replace(/\D/g, '');
+        if (clean.startsWith('0')) clean = clean.substring(1);
+        if (!clean.startsWith('972')) clean = '972' + clean;
+        window.open(`https://wa.me/${clean}`, '_blank');
+    }
+
+    function saveVCard(idx) {
+        const c = allContacts[idx];
+        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name}\nTEL;TYPE=CELL:${c.mobile}\nORG:${c.pluga} - ${c.framework}\nTITLE:${c.role}\nEND:VCARD`;
+        const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${c.name}.vcf`;
+        a.click();
     }
 
     function updateDropdowns() {
@@ -219,11 +153,7 @@
         const term = document.getElementById('searchInput').value.toLowerCase();
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
-        const res = allContacts.filter(c => 
-            (!term || c.searchKey.includes(term)) && 
-            (!p || c.pluga === p) && 
-            (!f || c.framework === f)
-        );
+        const res = allContacts.filter(c => (!term || c.searchKey.includes(term)) && (!p || c.pluga === p) && (!f || c.framework === f));
         renderContacts(res);
     }
 
