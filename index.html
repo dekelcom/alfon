@@ -36,7 +36,7 @@
 <body>
 
 <div class="header-section">
-    <div class="version-tag">V 2.2.1</div>
+    <div class="version-tag">V 2.2.2</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -111,68 +111,78 @@
         window.open(`https://wa.me/${clean}`, '_blank');
     }
 
-    function saveVCardIOS(idx) {
-      const c = allContacts[idx];
-      if (!c) return;
+    // חבר את זה לכפתור: onclick="return saveVCardIOS(event, INDEX);"
+    async function saveVCardIOS(evt, idx) {
+      try {
+        // אם הכפתור בתוך FORM - לעצור submit
+        if (evt) {
+          evt.preventDefault?.();
+          evt.stopPropagation?.();
+        }
     
-      // פיצול שם
-      const parts = (c.name || '').trim().split(/\s+/);
-      const firstName = parts[0] || '';
-      const lastName = parts.slice(1).join(' ') || '';
+        const c = allContacts?.[idx];
+        if (!c) throw new Error("Contact not found at index " + idx);
     
-      // נרמול טלפון ל-E.164
-      let digits = (c.mobile || '').replace(/\D/g, '');
-      if (digits.startsWith('0')) digits = '972' + digits.slice(1);
-      if (!digits.startsWith('972') && digits.length >= 9) digits = '972' + digits;
-      const phone = '+' + digits;
+        // פיצול שם
+        const parts = (c.name || "").trim().split(/\s+/);
+        const firstName = parts[0] || "";
+        const lastName = parts.slice(1).join(" ") || "";
     
-      // בניית vCard תקני ל-iOS
-      const CRLF = '\r\n';
-      const vcard =
-        '\uFEFF' + [
-          'BEGIN:VCARD',
-          'VERSION:3.0',
-          `N;CHARSET=UTF-8:${escapeV(lastName)};${escapeV(firstName)};;;`,
-          `FN;CHARSET=UTF-8:${escapeV(c.name)}`,
-          `ORG;CHARSET=UTF-8:${escapeV(c.pluga + ' - ' + c.framework)}`,
-          `TITLE;CHARSET=UTF-8:${escapeV(c.role)}`,
-          `TEL;TYPE=CELL,VOICE:${phone}`,
-          'END:VCARD'
-        ].join(CRLF) + CRLF;
+        // נרמול טלפון ל-E.164
+        let digits = (c.mobile || "").replace(/\D/g, "");
+        if (!digits) throw new Error("Missing phone number");
+        if (digits.startsWith("0")) digits = "972" + digits.slice(1);
+        if (!digits.startsWith("972") && digits.length >= 9) digits = "972" + digits;
+        const phone = "+" + digits;
     
-      // קובץ vcf אמיתי
-      const file = new File([vcard], `${c.name.replace(/\s+/g, '_')}.vcf`, {
-        type: 'text/vcard;charset=utf-8'
-      });
+        const CRLF = "\r\n";
+        const vcard =
+          "\uFEFF" +
+          [
+            "BEGIN:VCARD",
+            "VERSION:3.0",
+            `N;CHARSET=UTF-8:${escapeV(lastName)};${escapeV(firstName)};;;`,
+            `FN;CHARSET=UTF-8:${escapeV(c.name)}`,
+            `ORG;CHARSET=UTF-8:${escapeV((c.pluga || "") + " - " + (c.framework || ""))}`,
+            `TITLE;CHARSET=UTF-8:${escapeV(c.role || "")}`,
+            `TEL;TYPE=CELL,VOICE:${phone}`,
+            "END:VCARD",
+          ].join(CRLF) +
+          CRLF;
     
-      // iOS Share Sheet - הדרך הכי אמינה
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
-          files: [file],
-          title: 'Add Contact',
-          text: 'Import contact'
-        });
-      } else {
-        // fallback ל-Safari ישן
-        const dataUrl = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
-        const a = document.createElement('a');
-        a.href = dataUrl;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.download = `${c.name.replace(/\s+/g, '_')}.vcf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const safeName = (c.name || "contact").trim().replace(/\s+/g, "_");
+        const filename = `${safeName}.vcf`;
+    
+        // 1) לנסות Share Sheet (הכי אמין iOS 16+)
+        const file = new File([vcard], filename, { type: "text/vcard;charset=utf-8" });
+    
+        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+          await navigator.share({
+            files: [file],
+            title: "Add Contact",
+            text: "Import contact",
+          });
+          return false;
+        }
+    
+        // 2) fallback: לפתוח data URL בחלון חדש
+        const dataUrl = "data:text/vcard;charset=utf-8," + encodeURIComponent(vcard);
+        window.location.href = dataUrl; // יותר אמין מ-a.click ב-iOS
+        return false;
+      } catch (err) {
+        console.error("saveVCardIOS failed:", err);
+        alert("לא הצלחתי לשמור איש קשר: " + (err?.message || err));
+        return false;
       }
     }
     
     // Escaping לפי תקן vCard
     function escapeV(s) {
-      return (s || '')
-        .replace(/\\/g, '\\\\')
-        .replace(/\n/g, '\\n')
-        .replace(/;/g, '\\;')
-        .replace(/,/g, '\\,')
+      return (s || "")
+        .replace(/\\/g, "\\\\")
+        .replace(/\n/g, "\\n")
+        .replace(/;/g, "\\;")
+        .replace(/,/g, "\\,")
         .trim();
     }
 
