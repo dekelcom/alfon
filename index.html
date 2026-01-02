@@ -112,26 +112,39 @@
     }
 
     function saveVCard(idx) {
-        const c = allContacts[idx];
-        const vcard = [
-            'BEGIN:VCARD', 'VERSION:3.0',
-            `FN;CHARSET=UTF-8:${c.name}`,
-            `N;CHARSET=UTF-8:;${c.name};;;`,
-            `TEL;TYPE=CELL:${c.mobile}`,
-            `ORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}`,
-            `TITLE;CHARSET=UTF-8:${c.role}`,
-            'REV:' + new Date().toISOString(),
-            'END:VCARD'
-        ].join('\n');
-        const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${c.name.replace(/\s+/g, '_')}.vcf`;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { document.body.removeChild(a); window.URL.revokeObjectURL(url); }, 100);
-    }
+    const c = allContacts[idx];
+    
+    // פיצול השם לשם פרטי ומשפחה עבור שדה N (לפי המבנה שעובד לך)
+    const nameParts = c.name.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const vcard = [
+        'BEGIN:VCARD',
+        'VERSION:3.0',
+        `N;CHARSET=UTF-8:${lastName};${firstName};;;`, // המבנה המדויק מהקובץ שעובד
+        `FN;CHARSET=UTF-8:${c.name}`,
+        `ORG;CHARSET=UTF-8:${c.pluga} - ${c.framework}`,
+        `TITLE;CHARSET=UTF-8:${c.role}`,
+        `TEL;CELL;VOICE:${c.mobile}`, // שימוש בתגית המדויקת מהקובץ שעובד
+        'END:VCARD'
+    ].join('\n');
+
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${c.name.replace(/\s+/g, '_')}.vcf`;
+    
+    document.body.appendChild(a);
+    a.click();
+    
+    setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 100);
+}
 
     function updateDropdowns() {
         const pSel = document.getElementById('companyFilter');
