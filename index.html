@@ -109,25 +109,51 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwRpPSK1o_bMPDhLA5pCBws455lWMAu1P7NKlszqI4Dtfk28Y93sXlrVrspwqeLBk9e/exec';
 
     function loadData(isRefresh = false) {
-        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">טוען...</div>';
-        fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
+        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">מרענן נתונים...</div>';
+        
+        fetch(csvUrl + '&t=' + Date.now())
+        .then(r => r.text())
+        .then(txt => {
             Papa.parse(txt, {
-                header: true, skipEmptyLines: true,
+                header: true, 
+                skipEmptyLines: true,
                 complete: function(results) {
-                    allContacts = results.data.map((row, index) => ({
-                        index: index,
-                        firstName: (row.firstName || '').trim(),
-                        lastName: (row.lastName || '').trim(),
-                        name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
-                        pluga: (row.pluga || '').trim(),
-                        framework: (row.framework || '').trim(),
-                        role: (row.role || '').trim(),
-                        mobile: (rawMobile || '').trim(),
-                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
-                    })).filter(c => (c.firstName || c.lastName) && c.mobile);
+                    allContacts = results.data.map((row, index) => {
+                        // טיפול בטלפון - הוספת אפס אם חסר
+                        let rawMobile = (row.mobile || '').trim();
+                        if (rawMobile && !rawMobile.startsWith('0') && rawMobile.length >= 9) {
+                            rawMobile = '0' + rawMobile;
+                        }
+                        
+                        const fName = (row.firstName || '').trim();
+                        const lName = (row.lastName || '').trim();
+                        const pName = (row.pluga || '').trim();
+                        const frame = (row.framework || '').trim();
+                        const roleName = (row.role || '').trim();
+    
+                        return {
+                            index: index,
+                            firstName: fName,
+                            lastName: lName,
+                            name: `${fName} ${lName}`.trim(),
+                            pluga: pName,
+                            framework: frame,
+                            role: roleName,
+                            mobile: rawMobile,
+                            searchKey: `${fName} ${lName} ${roleName} ${pName} ${frame} ${rawMobile}`.toLowerCase()
+                        };
+                    }).filter(c => c.name && c.mobile);
+    
                     renderContacts(allContacts);
+                },
+                error: function(err) {
+                    console.error("שגיאה בקריאת ה-CSV:", err);
+                    document.getElementById('contactsGrid').innerHTML = "שגיאה בטעינת הנתונים.";
                 }
             });
+        })
+        .catch(err => {
+            console.error("שגיאה ב-Fetch:", err);
         });
     }
 
