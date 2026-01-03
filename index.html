@@ -36,7 +36,7 @@
 <body>
 
 <div class="header-section">
-    <div class="version-tag">V 2.3.2</div>
+    <div class="version-tag">V 2.3.3</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -82,16 +82,17 @@
 
     function renderContacts(list) {
     const grid = document.getElementById('contactsGrid');
-    
-    // ניקוי הגריד לפני רינדור מחדש
     grid.innerHTML = '';
 
+    // חילוץ שם המשתמש ושם ה-Repo מהכתובת הנוכחית
+    // זה מבטיח שהקישור יעבוד גם אם תשנה את שם ה-Repo בעתיד
+    const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+
     grid.innerHTML = list.map(c => {
-        // 1. הכנת מזהה הקובץ: לוקחים את mobileE164 ומסירים את ה-+ (כפי שמופיע בתיקיית vcards)
         const fileId = c.mobileE164 ? c.mobileE164.replace('+', '') : '';
         
-        // 2. בניית הנתיב לקובץ ה-VCF (נתיב יחסי לתיקיית השורש של הפרויקט)
-        const vcfUrl = `vcards/${fileId}.vcf`;
+        // בניית נתיב מלא: למשל https://dekelcom.github.io/alfon/vcards/972...vcf
+        const vcfUrl = `${baseUrl}vcards/${fileId}.vcf`;
 
         return `
             <div class="contact-card">
@@ -102,17 +103,17 @@
                 <div class="card-actions">
                     
                     <a href="${vcfUrl}" class="action-link">
-                        <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon" alt="Save">
+                        <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon">
                         <span class="action-text">שמירה</span>
                     </a>
 
                     <button onclick="openWA('${c.mobileE164 || c.mobile}')" class="action-link">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon" alt="WhatsApp">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
                         <span class="action-text">הודעה</span>
                     </button>
 
                     <a href="tel:${c.mobileE164 || c.mobile}" class="action-link">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon" alt="Call">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon">
                         <span class="action-text">חיוג</span>
                     </a>
 
