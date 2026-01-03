@@ -122,7 +122,7 @@
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
                         role: (row.role || '').trim(),
-                        mobile: (row.mobile || '').trim(),
+                        mobile: rawMobile, // עכשיו זה תמיד עם אפס
                         searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
                     })).filter(c => (c.firstName || c.lastName) && c.mobile);
                     renderContacts(allContacts);
