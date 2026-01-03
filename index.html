@@ -36,7 +36,7 @@
 <body>
 
 <div class="header-section">
-    <div class="version-tag">V 2.3.1</div>
+    <div class="version-tag">V 2.3.2</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -81,13 +81,16 @@
     }
 
     function renderContacts(list) {
-        const grid = document.getElementById('contactsGrid');
-        grid.innerHTML = list.map(c => {
-        // 1. ניקוי מספר הטלפון: משתמשים ב-mobileE164 ומורידים את ה-+
+    const grid = document.getElementById('contactsGrid');
+    
+    // ניקוי הגריד לפני רינדור מחדש
+    grid.innerHTML = '';
+
+    grid.innerHTML = list.map(c => {
+        // 1. הכנת מזהה הקובץ: לוקחים את mobileE164 ומסירים את ה-+ (כפי שמופיע בתיקיית vcards)
         const fileId = c.mobileE164 ? c.mobileE164.replace('+', '') : '';
         
-        // 2. בניית הנתיב: שימוש ב-vcards/ ללא סלאש מקדים או נקודה
-        // זה יחפש את התיקייה יחסית למיקום של index.html
+        // 2. בניית הנתיב לקובץ ה-VCF (נתיב יחסי לתיקיית השורש של הפרויקט)
         const vcfUrl = `vcards/${fileId}.vcf`;
 
         return `
@@ -95,27 +98,28 @@
                 <div class="name-header">${c.name}</div>
                 <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
                 <div class="phone-display">${c.mobile}</div>
+                
                 <div class="card-actions">
                     
-                    <a href="${vcfUrl}" download="${c.name.replace(/\s/g, '_')}.vcf" class="action-link">
-                    <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon">
-                    <span class="action-text">שמירה</span>
+                    <a href="${vcfUrl}" class="action-link">
+                        <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon" alt="Save">
+                        <span class="action-text">שמירה</span>
                     </a>
 
                     <button onclick="openWA('${c.mobileE164 || c.mobile}')" class="action-link">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon" alt="WhatsApp">
                         <span class="action-text">הודעה</span>
                     </button>
 
                     <a href="tel:${c.mobileE164 || c.mobile}" class="action-link">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon" alt="Call">
                         <span class="action-text">חיוג</span>
                     </a>
 
                 </div>
             </div>`;
     }).join('');
-    }
+}
 
     function openWA(mobile) {
         let clean = mobile.replace(/\D/g, '');
