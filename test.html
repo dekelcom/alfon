@@ -26,7 +26,6 @@
         .action-text { font-size: 0.7rem; font-weight: bold; }
         .phone-display { font-size: 0.9rem; font-weight: bold; margin: 8px 0; color: #000; direction: ltr; display: block; }
         
-        /* Modal Styles */
         #updateModal { display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
         .modal-content { background: white; margin: 10% auto; padding: 20px; border-radius: 12px; width: 85%; max-width: 500px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         .form-group { margin-bottom: 10px; text-align: right; }
@@ -36,7 +35,7 @@
 <body>
 
 <div class="header-section">
-    <div class="version-tag">V 2.4.0</div>
+    <div class="version-tag">V 2.6.1</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -47,17 +46,12 @@
         <button onclick="resetAll()" class="btn-top">נקה</button>
         <button onclick="loadData(true)" class="btn-top">רענן</button>
     </div>
-    <div class="flex-row">
-        <select id="companyFilter" onchange="handleCompanyChange()" class="flex-grow"><option value="">כל הפלוגות</option></select>
-        <select id="unitFilter" onchange="filterContacts()" class="flex-grow" disabled><option value="">כל המסגרות</option></select>
-    </div>
 </div>
 
 <div id="updateModal">
     <div class="modal-content">
         <span onclick="closeUpdateModal()" style="position: absolute; left: 15px; top: 10px; font-size: 24px; cursor: pointer;">&times;</span>
         <h3 style="text-align: center; color: var(--pakar-main); margin-top: 0;">עדכון פרטי קשר</h3>
-        <p style="font-size: 0.8rem; text-align: center; margin-bottom: 15px;">העדכון יתבצע בגיליון ויוריד לך כרטיס חדש</p>
         <form id="updateForm">
             <div class="form-group">
                 <label>שם פרטי:</label>
@@ -94,8 +88,6 @@
 <script>
     let allContacts = [];
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
-    
-    // החלף את ה-URL הזה בכתובת ה-Web App שקיבלת מגוגל (בשלב הבא)
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxpUF5SbyFwbF6b0unhJ9K6e66S0G4t9L_n-FkxREcUjVsbhXtFqh6T-_FgOuifIIhs/exec';
 
     function loadData(isRefresh = false) {
@@ -106,6 +98,8 @@
                 complete: function(results) {
                     allContacts = results.data.map((row, index) => ({
                         index: index,
+                        firstName: (row.firstName || '').trim(),
+                        lastName: (row.lastName || '').trim(),
                         name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
@@ -113,7 +107,6 @@
                         mobile: (row.mobile || '').trim(),
                         searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
                     })).filter(c => c.name && c.mobile);
-                    updateDropdowns();
                     renderContacts(allContacts);
                 }
             });
@@ -132,17 +125,14 @@
                         <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon">
                         <span class="action-text">חיוג</span>
                     </a>
-                    
                     <button onclick="openWA('${c.mobile}')" class="action-link">
                         <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
                         <span class="action-text">הודעה</span>
                     </button>
-
                     <button onclick="saveVCard(event, ${c.index})" class="action-link">
                         <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon">
                         <span class="action-text">שמירה</span>
                     </button>
-
                     <button onclick="openUpdateModal(${c.index})" class="action-link">
                         <img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" class="action-icon">
                         <span class="action-text">עריכה</span>
@@ -151,11 +141,12 @@
             </div>`).join('');
     }
 
-    // Modal Control
     function openUpdateModal(idx) {
         const c = allContacts.find(item => item.index === idx);
         if (c) {
-            document.getElementById('editName').value = c.name;
+            // התיקון כאן: שימוש ב-IDs הנכונים מה-HTML
+            document.getElementById('editFirstName').value = c.firstName;
+            document.getElementById('editLastName').value = c.lastName;
             document.getElementById('editMobile').value = c.mobile;
             document.getElementById('editPluga').value = c.pluga;
             document.getElementById('editFramework').value = c.framework;
@@ -169,7 +160,6 @@
         document.getElementById('statusMsg').innerText = "";
     }
 
-    // Submit to Google Sheets
     document.getElementById('updateForm').onsubmit = async function(e) {
         e.preventDefault();
         const status = document.getElementById('statusMsg');
@@ -182,60 +172,50 @@
             mobile: document.getElementById('editMobile').value,
             pluga: document.getElementById('editPluga').value,
             framework: document.getElementById('editFramework').value,
-            role: document.getElementById('editRole').value,
-            action: 'updateContact'
+            role: document.getElementById('editRole').value
         };
-
-        // Download updated VCard immediately
-        generateVCard(formData);
 
         try {
             await fetch(WEB_APP_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
             status.style.color = "green";
-            status.innerText = "הגיליון עודכן! הכרטיס ירד למכשיר.";
-            setTimeout(closeUpdateModal, 2000);
-            setTimeout(() => loadData(true), 3000);
+            status.innerText = "הגיליון עודכן בהצלחה!";
+            setTimeout(() => {
+                closeUpdateModal();
+                loadData(true);
+            }, 2000);
         } catch (err) {
-            status.style.color = "orange";
-            status.innerText = "הכרטיס ירד. העדכון בגיליון יופיע בקרוב.";
+            status.style.color = "red";
+            status.innerText = "שגיאה בעדכון הגיליון.";
         }
     };
-
-    function generateVCard(c) {
-        const nameParts = c.name.split(' ');
-        const fName = nameParts[0] || "";
-        const lName = nameParts.slice(1).join(' ') || "";
-        const orgParts = ["גדוד 882", c.pluga, c.framework, c.role].filter(p => p && p.trim().length > 0);
-        const orgDisplay = orgParts.join(" - ");
-
-        const vcard = [
-            "BEGIN:VCARD",
-            "VERSION:3.0",
-            `FN;CHARSET=UTF-8:${c.name} (גדוד 882)`,
-            `N;CHARSET=UTF-8:${lName};${fName};;;`,
-            `ORG;CHARSET=UTF-8:${orgDisplay}`,
-            `TEL;TYPE=CELL,VOICE:${c.mobile}`,
-            "END:VCARD"
-        ].join('\n');
-
-        const blob = new Blob(["\uFEFF", vcard], { type: "text/vcard;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.download = `${c.name}.vcf`;
-        a.href = url;
-        a.click();
-    }
 
     function saveVCard(evt, idx) {
         if (evt) evt.preventDefault();
         const c = allContacts.find(item => item.index === idx);
-        if (c) generateVCard(c);
+        if (c) {
+            const orgDisplay = ["גדוד 882", c.pluga, c.framework, c.role].filter(p => p && p.trim()).join(" - ");
+            const vcard = [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                `FN;CHARSET=UTF-8:${c.firstName} ${c.lastName} (גדוד 882)`,
+                `N;CHARSET=UTF-8:${c.lastName};${c.firstName};;;`,
+                `ORG;CHARSET=UTF-8:${orgDisplay}`,
+                `TEL;TYPE=CELL,VOICE:${c.mobile}`,
+                "END:VCARD"
+            ].join('\n');
+
+            const blob = new Blob(["\uFEFF", vcard], { type: "text/vcard;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.download = `${c.firstName}_${c.lastName}.vcf`;
+            a.href = url;
+            a.click();
+        }
     }
 
     function openWA(mobile) {
@@ -244,38 +224,15 @@
         window.open(`https://wa.me/${clean}`, '_blank');
     }
 
-    // Filter Logic
-    function updateDropdowns() {
-        const pSel = document.getElementById('companyFilter');
-        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
-        pSel.innerHTML = '<option value="">כל הפלוגות</option>' + plugot.map(p => `<option value="${p}">${p}</option>`).join('');
-    }
-
-    function handleCompanyChange() {
-        const pVal = document.getElementById('companyFilter').value;
-        const fSel = document.getElementById('unitFilter');
-        if (pVal) {
-            fSel.disabled = false;
-            const frames = [...new Set(allContacts.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
-            fSel.innerHTML = '<option value="">כל המסגרות</option>' + frames.map(f => `<option value="${f}">${f}</option>`).join('');
-        } else { fSel.disabled = true; fSel.innerHTML = '<option value="">כל המסגרות</option>'; }
-        filterContacts();
+    function resetAll() {
+        document.getElementById('searchInput').value = "";
+        loadData(true);
     }
 
     function filterContacts() {
         const term = document.getElementById('searchInput').value.toLowerCase();
-        const p = document.getElementById('companyFilter').value;
-        const f = document.getElementById('unitFilter').value;
-        const res = allContacts.filter(c => (!term || c.searchKey.includes(term)) && (!p || c.pluga === p) && (!f || c.framework === f));
+        const res = allContacts.filter(c => !term || c.searchKey.includes(term));
         renderContacts(res);
-    }
-
-    function resetAll() {
-        document.getElementById('searchInput').value = "";
-        document.getElementById('companyFilter').value = "";
-        document.getElementById('unitFilter').value = "";
-        document.getElementById('unitFilter').disabled = true;
-        renderContacts(allContacts);
     }
 
     loadData();
