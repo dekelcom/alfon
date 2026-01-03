@@ -25,18 +25,12 @@
         .action-icon { width: 28px; height: 28px; margin-bottom: 4px; }
         .action-text { font-size: 0.7rem; font-weight: bold; }
         .phone-display { font-size: 0.9rem; font-weight: bold; margin: 8px 0; color: #000; direction: ltr; display: block; }
-        select {
-            -webkit-appearance: none; appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237c4535' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: left 12px center; background-size: 16px;
-            padding-left: 35px !important;
-        }
     </style>
 </head>
 <body>
 
 <div class="header-section">
-    <div class="version-tag">V 2.3.3</div>
+    <div class="version-tag">V 2.3.4</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -57,6 +51,7 @@
 
 <script>
     let allContacts = [];
+    // ה-CSV המקורי שלך
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
 
     function loadData(isRefresh = false) {
@@ -65,7 +60,8 @@
             Papa.parse(txt, {
                 header: true, skipEmptyLines: true,
                 complete: function(results) {
-                    allContacts = results.data.map(row => ({
+                    allContacts = results.data.map((row, index) => ({
+                        index: index, // שומרים אינדקס לגישה מהירה
                         name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
                         pluga: (row.pluga || '').trim(),
                         framework: (row.framework || '').trim(),
@@ -81,127 +77,83 @@
     }
 
     function renderContacts(list) {
-    const grid = document.getElementById('contactsGrid');
-    grid.innerHTML = '';
-
-    // חילוץ שם המשתמש ושם ה-Repo מהכתובת הנוכחית
-    // זה מבטיח שהקישור יעבוד גם אם תשנה את שם ה-Repo בעתיד
-    const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
-
-    grid.innerHTML = list.map(c => {
-        const fileId = c.mobileE164 ? c.mobileE164.replace('+', '') : '';
-        
-        // בניית נתיב מלא: למשל https://dekelcom.github.io/alfon/vcards/972...vcf
-        const vcfUrl = `${baseUrl}vcards/${fileId}.vcf`;
-
-        return `
+        const grid = document.getElementById('contactsGrid');
+        grid.innerHTML = list.map(c => `
             <div class="contact-card">
                 <div class="name-header">${c.name}</div>
                 <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
                 <div class="phone-display">${c.mobile}</div>
                 
                 <div class="card-actions">
-                    
-                    <a href="${vcfUrl}" class="action-link">
+                    <button onclick="saveVCardIOS(event, ${c.index})" class="action-link">
                         <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon">
                         <span class="action-text">שמירה</span>
-                    </a>
+                    </button>
 
-                    <button onclick="openWA('${c.mobileE164 || c.mobile}')" class="action-link">
+                    <button onclick="openWA('${c.mobile}')" class="action-link">
                         <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
                         <span class="action-text">הודעה</span>
                     </button>
 
-                    <a href="tel:${c.mobileE164 || c.mobile}" class="action-link">
+                    <a href="tel:${c.mobile}" class="action-link">
                         <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon">
                         <span class="action-text">חיוג</span>
                     </a>
-
                 </div>
-            </div>`;
-    }).join('');
-}
+            </div>`).join('');
+    }
 
     function openWA(mobile) {
         let clean = mobile.replace(/\D/g, '');
-        if (clean.startsWith('0')) clean = clean.substring(1);
-        if (!clean.startsWith('972')) clean = '972' + clean;
+        if (clean.startsWith('0')) clean = '972' + clean.substring(1);
         window.open(`https://wa.me/${clean}`, '_blank');
     }
 
-    // חבר את זה לכפתור: onclick="return saveVCardIOS(event, INDEX);"
     async function saveVCardIOS(evt, idx) {
-      try {
-        // אם הכפתור בתוך FORM - לעצור submit
-        if (evt) {
-          evt.preventDefault?.();
-          evt.stopPropagation?.();
-        }
-    
-        const c = allContacts?.[idx];
-        if (!c) throw new Error("Contact not found at index " + idx);
-    
-        // פיצול שם
-        const parts = (c.name || "").trim().split(/\s+/);
-        const firstName = parts[0] || "";
-        const lastName = parts.slice(1).join(" ") || "";
-    
-        // נרמול טלפון ל-E.164
-        let digits = (c.mobile || "").replace(/\D/g, "");
-        if (!digits) throw new Error("Missing phone number");
-        if (digits.startsWith("0")) digits = "972" + digits.slice(1);
-        if (!digits.startsWith("972") && digits.length >= 9) digits = "972" + digits;
-        const phone = "+" + digits;
-    
-        const CRLF = "\r\n";
-        const vcard =
-          "\uFEFF" +
-          [
+        if (evt) evt.preventDefault();
+        
+        // מוצאים את איש הקשר המקורי לפי האינדקס
+        const c = allContacts.find(item => item.index === idx);
+        if (!c) return;
+
+        const nameParts = c.name.split(' ');
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(' ') || "";
+        
+        // בניית מחרוזת הארגון הסופית: גדוד 882 - פלוגה - מסגרת - תפקיד
+        const orgParts = [
+            "גדוד 882",
+            c.pluga || "",
+            c.framework || "",
+            c.role || ""
+        ].filter(p => p.trim().length > 0);
+        const orgDisplay = orgParts.join(" - ");
+
+        // יצירת VCF גרסה 3.0 (הכי יציב לעברית בספארי)
+        const vcard = [
             "BEGIN:VCARD",
             "VERSION:3.0",
-            `N;CHARSET=UTF-8:${escapeV(lastName)};${escapeV(firstName)};;;`,
-            `FN;CHARSET=UTF-8:${escapeV(c.name)}`,
-            `ORG;CHARSET=UTF-8:${escapeV((c.pluga || "") + " - " + (c.framework || ""))}`,
-            `TITLE;CHARSET=UTF-8:${escapeV(c.role || "")}`,
-            `TEL;TYPE=CELL,VOICE:${phone}`,
-            "END:VCARD",
-          ].join(CRLF) +
-          CRLF;
-    
-        const safeName = (c.name || "contact").trim().replace(/\s+/g, "_");
-        const filename = `${safeName}.vcf`;
-    
-        // 1) לנסות Share Sheet (הכי אמין iOS 16+)
-        const file = new File([vcard], filename, { type: "text/vcard;charset=utf-8" });
-    
-        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
-          await navigator.share({
-            files: [file],
-            title: "Add Contact",
-            text: "Import contact",
-          });
-          return false;
-        }
-    
-        // 2) fallback: לפתוח data URL בחלון חדש
-        const dataUrl = "data:text/vcard;charset=utf-8," + encodeURIComponent(vcard);
-        window.location.href = dataUrl; // יותר אמין מ-a.click ב-iOS
-        return false;
-      } catch (err) {
-        console.error("saveVCardIOS failed:", err);
-        alert("לא הצלחתי לשמור איש קשר: " + (err?.message || err));
-        return false;
-      }
-    }
-    
-    // Escaping לפי תקן vCard
-    function escapeV(s) {
-      return (s || "")
-        .replace(/\\/g, "\\\\")
-        .replace(/\n/g, "\\n")
-        .replace(/;/g, "\\;")
-        .replace(/,/g, "\\,")
-        .trim();
+            `FN;CHARSET=UTF-8:${c.name} (גדוד 882)`,
+            `N;CHARSET=UTF-8:${lastName};${firstName};;;`,
+            `ORG;CHARSET=UTF-8:${orgDisplay}`,
+            "TITLE;CHARSET=UTF-8:", 
+            `TEL;TYPE=CELL,VOICE:${c.mobile}`,
+            "END:VCARD"
+        ].join('\n');
+
+        const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        
+        const newLink = document.createElement('a');
+        newLink.download = `${c.name}.vcf`;
+        newLink.href = url;
+        document.body.appendChild(newLink);
+        newLink.click();
+        
+        setTimeout(() => {
+            document.body.removeChild(newLink);
+            URL.revokeObjectURL(url);
+        }, 100);
     }
 
     function updateDropdowns() {
@@ -217,7 +169,10 @@
             fSel.disabled = false;
             const frames = [...new Set(allContacts.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
             fSel.innerHTML = '<option value="">כל המסגרות</option>' + frames.map(f => `<option value="${f}">${f}</option>`).join('');
-        } else { fSel.disabled = true; fSel.innerHTML = '<option value="">כל המסגרות</option>'; }
+        } else { 
+            fSel.disabled = true; 
+            fSel.innerHTML = '<option value="">כל המסגרות</option>'; 
+        }
         filterContacts();
     }
 
@@ -225,7 +180,11 @@
         const term = document.getElementById('searchInput').value.toLowerCase();
         const p = document.getElementById('companyFilter').value;
         const f = document.getElementById('unitFilter').value;
-        const res = allContacts.filter(c => (!term || c.searchKey.includes(term)) && (!p || c.pluga === p) && (!f || c.framework === f));
+        const res = allContacts.filter(c => 
+            (!term || c.searchKey.includes(term)) && 
+            (!p || c.pluga === p) && 
+            (!f || c.framework === f)
+        );
         renderContacts(res);
     }
 
