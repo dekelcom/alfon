@@ -86,7 +86,7 @@
         // הכנת מזהה הקובץ: לוקחים את mobileE164 ומסירים את ה-+
         // התוצאה תהיה למשל 972522596660
         const fileId = c.mobileE164 ? c.mobileE164.replace('+', '') : '';
-        const vcfUrl = `vcards/${fileId}.vcf`;
+        const vcfUrl = `./vcards/${fileId}.vcf`;
 
         return `
             <div class="contact-card">
