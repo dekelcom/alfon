@@ -17,10 +17,10 @@ jobs:
         run: pip install requests
       - name: Generate VCards
         run: python generate_vcards.py
-      - name: Commit and Push
+      - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add vcards/*.vcf
-          git commit -m "Update VCards from Sheets" || exit 0
+          git add vcards/*.vcf contacts.json  # <--- השינוי כאן! הוספנו את contacts.json
+          git commit -m "Update VCards and JSON from Sheets" || exit 0
           git push
