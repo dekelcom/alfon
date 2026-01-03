@@ -35,7 +35,7 @@
 <body>
 
 <div class="header-section">
-    <div class="version-tag">V 3.0.0</div>
+    <div class="version-tag">V 2.6.1</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
 </div>
@@ -125,20 +125,50 @@ function populateEditPlugaOptions() {
 
     // עדכון פונקציית פתיחת המודל שתומכת ברשימות
     function openUpdateModal(idx) {
-        const c = allContacts.find(item => item.index === idx);
-        if (c) {
-            populateEditPlugaOptions(); // מילוי הפלוגות קודם
+    const c = allContacts.find(item => item.index === idx);
+    if (c) {
+        // 1. מילוי רשימת הפלוגות בטופס
+        const pSel = document.getElementById('editPluga');
+        const plugot = [...new Set(allContacts.map(item => item.pluga))].filter(Boolean).sort();
+        pSel.innerHTML = '<option value="">בחר פלוגה...</option>' + 
+                         plugot.map(p => `<option value="${p}">${p}</option>`).join('');
+
+        // 2. מילוי השדות הטקסטואליים
+        document.getElementById('editFirstName').value = c.firstName || '';
+        document.getElementById('editLastName').value = c.lastName || '';
+        document.getElementById('editMobile').value = c.mobile || '';
+        document.getElementById('editRole').value = c.role || '';
+        
+        // 3. הצבת הפלוגה הנוכחית
+        pSel.value = c.pluga;
+
+        // 4. מילוי רשימת המסגרות על בסיס הפלוגה שנבחרה
+        updateEditFrameworkOptions(c.framework);
+    }
+    document.getElementById('updateModal').style.display = 'block';
+}
+
+    // פונקציית עזר לעדכון המסגרות (לוודא שהיא נראית כך)
+    function updateEditFrameworkOptions(selectedFramework = "") {
+        const pVal = document.getElementById('editPluga').value;
+        const fSel = document.getElementById('editFramework');
+        
+        if (pVal) {
+            const frames = [...new Set(allContacts
+                .filter(item => item.pluga === pVal)
+                .map(item => item.framework))]
+                .filter(Boolean).sort();
+                
+            fSel.innerHTML = '<option value="">בחר מסגרת...</option>' + 
+                            frames.map(f => `<option value="${f}">${f}</option>`).join('');
             
-            document.getElementById('editFirstName').value = c.firstName;
-            document.getElementById('editLastName').value = c.lastName;
-            document.getElementById('editMobile').value = c.mobile;
-            document.getElementById('editRole').value = c.role;
-            
-            // בחירת הפלוגה ועדכון המסגרות שלה
-            document.getElementById('editPluga').value = c.pluga;
-            updateEditFrameworkOptions(c.framework);
+            // הצבת הערך הקיים אם הוא מופיע ברשימה
+            if (selectedFramework) {
+                fSel.value = selectedFramework;
+            }
+        } else {
+            fSel.innerHTML = '<option value="">בחר פלוגה תחילה</option>';
         }
-        document.getElementById('updateModal').style.display = 'block';
     }
     
     function loadData(isRefresh = false) {
