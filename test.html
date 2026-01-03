@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>אלפון גדוד 882</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        :root { --pakar-main: #7c4535; --pakar-bg: #f8f9fa; }
+        body { background-color: var(--pakar-bg); font-family: system-ui, sans-serif; margin: 0; padding: 0; }
+        .version-tag { position: absolute; top: 5px; left: 10px; font-size: 0.8rem; color: #999; font-weight: bold; }
+        .header-section { text-align: center; padding: 15px 10px 10px; background: white; border-bottom: 2px solid #d14a24; position: relative; }
+        .unit-logo { width: 45px; height: auto; }
+        .search-container { position: sticky; top: 0; background: var(--pakar-bg); z-index: 1000; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .flex-row { display: flex; gap: 6px; margin-bottom: 8px; }
+        input, select { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px !important; width: 100%; box-sizing: border-box; background: white; }
+        .btn-top { background: white; border: 1px solid #ccc; border-radius: 8px; padding: 0 10px; font-weight: bold; color: var(--pakar-main); cursor: pointer; }
+        .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; align-items: start; }
+        @media (min-width: 900px) { .contacts-grid { grid-template-columns: repeat(4, 1fr); } }
+        .contact-card { background: white; border-radius: 12px; padding: 15px 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center; }
+        .name-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #000; }
+        .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 12px; line-height: 1.4; min-height: 55px; }
+        .card-actions { display: flex; border-top: 1px solid #eee; padding-top: 10px; margin-top: auto; }
+        .action-link { flex: 1; text-decoration: none !important; color: #333 !important; display: flex; flex-direction: column; align-items: center; cursor: pointer; background: none; border: none; }
+        .action-icon { width: 28px; height: 28px; margin-bottom: 4px; }
+        .action-text { font-size: 0.7rem; font-weight: bold; }
+        .phone-display { font-size: 0.9rem; font-weight: bold; margin: 8px 0; color: #000; direction: ltr; display: block; }
+        
+        /* Modal Styles */
+        #updateModal { display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
+        .modal-content { background: white; margin: 10% auto; padding: 20px; border-radius: 12px; width: 85%; max-width: 500px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .form-group { margin-bottom: 10px; text-align: right; }
+        .form-group label { display: block; font-size: 0.9rem; margin-bottom: 4px; font-weight: bold; color: var(--pakar-main); }
+    </style>
+</head>
+<body>
+
+<div class="header-section">
+    <div class="version-tag">V 2.4.0</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
+    <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
+</div>
+
+<div class="search-container">
+    <div class="flex-row">
+        <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()" class="flex-grow">
+        <button onclick="resetAll()" class="btn-top">נקה</button>
+        <button onclick="loadData(true)" class="btn-top">רענן</button>
+    </div>
+    <div class="flex-row">
+        <select id="companyFilter" onchange="handleCompanyChange()" class="flex-grow"><option value="">כל הפלוגות</option></select>
+        <select id="unitFilter" onchange="filterContacts()" class="flex-grow" disabled><option value="">כל המסגרות</option></select>
+    </div>
+</div>
+
+<div id="updateModal">
+    <div class="modal-content">
+        <span onclick="closeUpdateModal()" style="position: absolute; left: 15px; top: 10px; font-size: 24px; cursor: pointer;">&times;</span>
+        <h3 style="text-align: center; color: var(--pakar-main); margin-top: 0;">עדכון פרטי קשר</h3>
+        <p style="font-size: 0.8rem; text-align: center; margin-bottom: 15px;">העדכון יתבצע בגיליון ויוריד לך כרטיס חדש</p>
+        <form id="updateForm">
+            <div class="form-group">
+                <label>שם מלא:</label>
+                <input type="text" id="editName" required>
+            </div>
+            <div class="form-group">
+                <label>טלפון נייד:</label>
+                <input type="tel" id="editMobile" required dir="ltr">
+            </div>
+            <div class="form-group">
+                <label>פלוגה:</label>
+                <select id="editPluga">
+                    <option value="מפקדה">מפקדה</option>
+                    <option value="פלוגה א">פלוגה א</option>
+                    <option value="פלוגה ב">פלוגה ב</option>
+                    <option value="פלוגה ג">פלוגה ג</option>
+                    <option value="מסייעת">מסייעת</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>מסגרת (מחלקה/צוות):</label>
+                <input type="text" id="editFramework">
+            </div>
+            <div class="form-group">
+                <label>תפקיד:</label>
+                <input type="text" id="editRole">
+            </div>
+            <button type="submit" class="btn-top" style="background: #28a745; color: white; width: 100%; margin-top: 10px; padding: 12px; font-size: 1.1rem;">שמור ועדכן</button>
+        </form>
+        <div id="statusMsg" style="text-align: center; margin-top: 10px; font-weight: bold; font-size: 0.9rem;"></div>
+    </div>
+</div>
+
+<div id="contactsGrid" class="contacts-grid"></div>
+
+<script>
+    let allContacts = [];
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
+    
+    // החלף את ה-URL הזה בכתובת ה-Web App שקיבלת מגוגל (בשלב הבא)
+    const WEB_APP_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+
+    function loadData(isRefresh = false) {
+        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">מרענן נתונים...</div>';
+        fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
+            Papa.parse(txt, {
+                header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    allContacts = results.data.map((row, index) => ({
+                        index: index,
+                        name: `${row.firstName || ''} ${row.lastName || ''}`.trim(),
+                        pluga: (row.pluga || '').trim(),
+                        framework: (row.framework || '').trim(),
+                        role: (row.role || '').trim(),
+                        mobile: (row.mobile || '').trim(),
+                        searchKey: `${row.firstName} ${row.lastName} ${row.role} ${row.pluga} ${row.framework} ${row.mobile}`.toLowerCase()
+                    })).filter(c => c.name && c.mobile);
+                    updateDropdowns();
+                    renderContacts(allContacts);
+                }
+            });
+        });
+    }
+
+    function renderContacts(list) {
+        const grid = document.getElementById('contactsGrid');
+        grid.innerHTML = list.map(c => `
+            <div class="contact-card">
+                <div class="name-header">${c.name}</div>
+                <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
+                <div class="phone-display">${c.mobile}</div>
+                <div class="card-actions">
+                    <button onclick="saveVCard(event, ${c.index})" class="action-link">
+                        <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon">
+                        <span class="action-text">שמירה</span>
+                    </button>
+                    <button onclick="openUpdateModal(${c.index})" class="action-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" class="action-icon">
+                        <span class="action-text">עריכה</span>
+                    </button>
+                    <button onclick="openWA('${c.mobile}')" class="action-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
+                        <span class="action-text">הודעה</span>
+                    </button>
+                </div>
+            </div>`).join('');
+    }
+
+    // Modal Control
+    function openUpdateModal(idx) {
+        const c = allContacts.find(item => item.index === idx);
+        if (c) {
+            document.getElementById('editName').value = c.name;
+            document.getElementById('editMobile').value = c.mobile;
+            document.getElementById('editPluga').value = c.pluga;
+            document.getElementById('editFramework').value = c.framework;
+            document.getElementById('editRole').value = c.role;
+        }
+        document.getElementById('updateModal').style.display = 'block';
+    }
+
+    function closeUpdateModal() {
+        document.getElementById('updateModal').style.display = 'none';
+        document.getElementById('statusMsg').innerText = "";
+    }
+
+    // Submit to Google Sheets
+    document.getElementById('updateForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const status = document.getElementById('statusMsg');
+        status.style.color = "blue";
+        status.innerText = "מעדכן גיליון... נא להמתין";
+
+        const formData = {
+            name: document.getElementById('editName').value,
+            mobile: document.getElementById('editMobile').value,
+            pluga: document.getElementById('editPluga').value,
+            framework: document.getElementById('editFramework').value,
+            role: document.getElementById('editRole').value,
+            action: 'updateContact'
+        };
+
+        // Download updated VCard immediately
+        generateVCard(formData);
+
+        try {
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            status.style.color = "green";
+            status.innerText = "הגיליון עודכן! הכרטיס ירד למכשיר.";
+            setTimeout(closeUpdateModal, 2000);
+            setTimeout(() => loadData(true), 3000);
+        } catch (err) {
+            status.style.color = "orange";
+            status.innerText = "הכרטיס ירד. העדכון בגיליון יופיע בקרוב.";
+        }
+    };
+
+    function generateVCard(c) {
+        const nameParts = c.name.split(' ');
+        const fName = nameParts[0] || "";
+        const lName = nameParts.slice(1).join(' ') || "";
+        const orgParts = ["גדוד 882", c.pluga, c.framework, c.role].filter(p => p && p.trim().length > 0);
+        const orgDisplay = orgParts.join(" - ");
+
+        const vcard = [
+            "BEGIN:VCARD",
+            "VERSION:3.0",
+            `FN;CHARSET=UTF-8:${c.name} (גדוד 882)`,
+            `N;CHARSET=UTF-8:${lName};${fName};;;`,
+            `ORG;CHARSET=UTF-8:${orgDisplay}`,
+            `TEL;TYPE=CELL,VOICE:${c.mobile}`,
+            "END:VCARD"
+        ].join('\n');
+
+        const blob = new Blob(["\uFEFF", vcard], { type: "text/vcard;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.download = `${c.name}.vcf`;
+        a.href = url;
+        a.click();
+    }
+
+    function saveVCard(evt, idx) {
+        if (evt) evt.preventDefault();
+        const c = allContacts.find(item => item.index === idx);
+        if (c) generateVCard(c);
+    }
+
+    function openWA(mobile) {
+        let clean = mobile.replace(/\D/g, '');
+        if (clean.startsWith('0')) clean = '972' + clean.substring(1);
+        window.open(`https://wa.me/${clean}`, '_blank');
+    }
+
+    // Filter Logic
+    function updateDropdowns() {
+        const pSel = document.getElementById('companyFilter');
+        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
+        pSel.innerHTML = '<option value="">כל הפלוגות</option>' + plugot.map(p => `<option value="${p}">${p}</option>`).join('');
+    }
+
+    function handleCompanyChange() {
+        const pVal = document.getElementById('companyFilter').value;
+        const fSel = document.getElementById('unitFilter');
+        if (pVal) {
+            fSel.disabled = false;
+            const frames = [...new Set(allContacts.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
+            fSel.innerHTML = '<option value="">כל המסגרות</option>' + frames.map(f => `<option value="${f}">${f}</option>`).join('');
+        } else { fSel.disabled = true; fSel.innerHTML = '<option value="">כל המסגרות</option>'; }
+        filterContacts();
+    }
+
+    function filterContacts() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const p = document.getElementById('companyFilter').value;
+        const f = document.getElementById('unitFilter').value;
+        const res = allContacts.filter(c => (!term || c.searchKey.includes(term)) && (!p || c.pluga === p) && (!f || c.framework === f));
+        renderContacts(res);
+    }
+
+    function resetAll() {
+        document.getElementById('searchInput').value = "";
+        document.getElementById('companyFilter').value = "";
+        document.getElementById('unitFilter').value = "";
+        document.getElementById('unitFilter').disabled = true;
+        renderContacts(allContacts);
+    }
+
+    loadData();
+</script>
+</body>
+</html>
