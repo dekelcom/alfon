@@ -83,10 +83,12 @@
     function renderContacts(list) {
         const grid = document.getElementById('contactsGrid');
         grid.innerHTML = list.map(c => {
-        // הכנת מזהה הקובץ: לוקחים את mobileE164 ומסירים את ה-+
-        // התוצאה תהיה למשל 972522596660
+        // 1. ניקוי מספר הטלפון: משתמשים ב-mobileE164 ומורידים את ה-+
         const fileId = c.mobileE164 ? c.mobileE164.replace('+', '') : '';
-        const vcfUrl = `./vcards/${fileId}.vcf`;
+        
+        // 2. בניית הנתיב: שימוש ב-vcards/ ללא סלאש מקדים או נקודה
+        // זה יחפש את התיקייה יחסית למיקום של index.html
+        const vcfUrl = `vcards/${fileId}.vcf`;
 
         return `
             <div class="contact-card">
