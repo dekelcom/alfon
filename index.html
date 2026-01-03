@@ -192,19 +192,22 @@
         } catch (e) { status.innerText = "שגיאת חיבור"; }
     }
 
+ 
+    // פונקציית העריכה - עכשיו פתוחה לכולם ללא הזדהות
     function handleEditClick(idx) {
-        if (!isLoggedIn) alert("יש להתחבר כמנהל לביצוע עריכה (לחץ על כותרת האלפון)");
-        else openUpdateModal(idx);
+        openUpdateModal(idx);
     }
-
-    // הוספה עם סינון מתקדם
+    
+    // פונקציית ההוספה - נשארת מוגנת למנהלים בלבד
     function openAddModal() {
-        const pSel = document.getElementById('addPluga');
-        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
-        let options = '<option value="">בחר פלוגה...</option>';
-        plugot.forEach(p => options += `<option value="${p}">${p}</option>`);
-        pSel.innerHTML = options;
-        document.getElementById('addFramework').innerHTML = '<option value="">בחר פלוגה...</option>';
+        if (!isLoggedIn) {
+            alert("הוספת איש קשר חדש דורשת הרשאת מנהל. אנא התחבר דרך הכותרת.");
+            showLogin();
+            return;
+        }
+        
+        // אם מחובר - טוען את הפלוגות והמסגרות (הסינון המתקדם)
+        populateAddPlugaOptions();
         document.getElementById('addModal').style.display = 'block';
     }
 
