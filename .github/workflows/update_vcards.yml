@@ -1,0 +1,26 @@
+name: Update VCards
+on:
+  schedule:
+    - cron: '0 0 * * *' # ירוץ כל לילה במוסקבה
+  workflow_dispatch: # מאפשר להריץ ידנית בלחיצת כפתור
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Generate VCards
+        run: python generate_vcards.py
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add vcards/*.vcf
+          git commit -m "Update VCards from Sheets" || exit 0
+          git push
