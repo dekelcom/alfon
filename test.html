@@ -123,34 +123,36 @@ function populateEditPlugaOptions() {
         }
     }
 
-    // עדכון פונקציית פתיחת המודל שתומכת ברשימות
     function openUpdateModal(idx) {
-    const c = allContacts.find(item => item.index === idx);
-    if (c) {
-        // 1. מילוי רשימת הפלוגות בטופס
-        const pSel = document.getElementById('editPluga');
-        const plugot = [...new Set(allContacts.map(item => item.pluga))].filter(Boolean).sort();
-        pSel.innerHTML = '<option value="">בחר פלוגה...</option>' + 
-                         plugot.map(p => `<option value="${p}">${p}</option>`).join('');
+        const c = allContacts.find(item => item.index === idx);
+        if (c) {
+            // 1. מילוי שדות הטקסט והטלפון
+            document.getElementById('editFirstName').value = c.firstName || '';
+            document.getElementById('editLastName').value = c.lastName || '';
+            document.getElementById('editMobile').value = c.mobile || '';
+            document.getElementById('editRole').value = c.role || '';
 
-        // 2. מילוי השדות הטקסטואליים
-        document.getElementById('editFirstName').value = c.firstName || '';
-        document.getElementById('editLastName').value = c.lastName || '';
-        document.getElementById('editMobile').value = c.mobile || '';
-        document.getElementById('editRole').value = c.role || '';
-        
-        // 3. הצבת הפלוגה הנוכחית
-        pSel.value = c.pluga;
+            // 2. בניית רשימת הפלוגות בתוך המודל
+            const pSel = document.getElementById('editPluga');
+            const plugot = [...new Set(allContacts.map(item => item.pluga))].filter(Boolean).sort();
+            
+            // יצירת ה-HTML של האפשרויות
+            let plugaOptions = '<option value="">בחר פלוגה...</option>';
+            plugot.forEach(p => {
+                const isSelected = (p === c.pluga) ? 'selected' : '';
+                plugaOptions += `<option value="${p}" ${isSelected}>${p}</option>`;
+            });
+            pSel.innerHTML = plugaOptions;
 
-        // 4. מילוי רשימת המסגרות על בסיס הפלוגה שנבחרה
-        updateEditFrameworkOptions(c.framework);
+            // 3. בניית רשימת המסגרות (חשוב: על בסיס הפלוגה של איש הקשר)
+            updateEditFrameworkOptions(c.framework, c.pluga);
+        }
+        document.getElementById('updateModal').style.display = 'block';
     }
-    document.getElementById('updateModal').style.display = 'block';
-}
 
-    // פונקציית עזר לעדכון המסגרות (לוודא שהיא נראית כך)
-    function updateEditFrameworkOptions(selectedFramework = "") {
-        const pVal = document.getElementById('editPluga').value;
+    function updateEditFrameworkOptions(selectedFramework = "", forcePluga = null) {
+        // אם קיבלנו פלוגה ספציפית (בפתיחת מודל) נשתמש בה, אחרת ניקח מה-Select
+        const pVal = forcePluga || document.getElementById('editPluga').value;
         const fSel = document.getElementById('editFramework');
         
         if (pVal) {
@@ -159,19 +161,18 @@ function populateEditPlugaOptions() {
                 .map(item => item.framework))]
                 .filter(Boolean).sort();
                 
-            fSel.innerHTML = '<option value="">בחר מסגרת...</option>' + 
-                            frames.map(f => `<option value="${f}">${f}</option>`).join('');
-            
-            // הצבת הערך הקיים אם הוא מופיע ברשימה
-            if (selectedFramework) {
-                fSel.value = selectedFramework;
-            }
+            let frameOptions = '<option value="">בחר מסגרת...</option>';
+            frames.forEach(f => {
+                const isSelected = (f === selectedFramework) ? 'selected' : '';
+                frameOptions += `<option value="${f}" ${isSelected}>${f}</option>`;
+            });
+            fSel.innerHTML = frameOptions;
         } else {
             fSel.innerHTML = '<option value="">בחר פלוגה תחילה</option>';
         }
     }
     
-    function loadData(isRefresh = false) {
+        function loadData(isRefresh = false) {
         if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">מרענן נתונים...</div>';
         fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
