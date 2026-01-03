@@ -130,17 +130,24 @@
                 <div class="info-sub">${c.pluga}<br>${c.framework}<br>${c.role}</div>
                 <div class="phone-display">${c.mobile}</div>
                 <div class="card-actions">
+                    <a href="tel:${c.mobile}" class="action-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon">
+                        <span class="action-text">חיוג</span>
+                    </a>
+                    
+                    <button onclick="openWA('${c.mobile}')" class="action-link">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
+                        <span class="action-text">הודעה</span>
+                    </button>
+
                     <button onclick="saveVCard(event, ${c.index})" class="action-link">
                         <img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon">
                         <span class="action-text">שמירה</span>
                     </button>
+
                     <button onclick="openUpdateModal(${c.index})" class="action-link">
                         <img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" class="action-icon">
                         <span class="action-text">עריכה</span>
-                    </button>
-                    <button onclick="openWA('${c.mobile}')" class="action-link">
-                        <img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon">
-                        <span class="action-text">הודעה</span>
                     </button>
                 </div>
             </div>`).join('');
