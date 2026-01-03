@@ -18,7 +18,12 @@ def generate():
         name = f"{row.get('firstName', '')} {row.get('lastName', '')}".strip()
         if not name or not row.get('mobile'): continue
         
-        # מבנה ה-VCF התקני לאייפון
+        # שימוש בשדה mobileE164 מהגוגל שיטס
+        phone_number = row.get('mobileE164', '').strip()
+        
+        # דילוג על שורות ריקות או ללא מספר
+        if not name or not phone_number: continue
+        
         vcf_content = [
             "BEGIN:VCARD",
             "VERSION:3.0",
@@ -26,15 +31,18 @@ def generate():
             f"FN;CHARSET=UTF-8:{name}",
             f"ORG;CHARSET=UTF-8:{row.get('pluga','')} - {row.get('framework','')}",
             f"TITLE;CHARSET=UTF-8:{row.get('role','')}",
-            f"TEL;TYPE=CELL;VOICE:{row.get('mobile','')}",
+            f"TEL;TYPE=CELL;VOICE:{phone_number}", # המספר בפורמט +972...
             "END:VCARD"
         ]
         
-        # שם הקובץ יהיה המספר נייד (כדי שיהיה ייחודי ולא יהיו בעיות עברית ב-URL)
-        filename = f"vcards/{row.get('mobile').replace('-','')}.vcf"
+        # שם הקובץ יהיה המספר ללא ה-+ (למשל 972502001754.vcf)
+        clean_filename = phone_number.replace('+', '')
+        filename = f"vcards/{clean_filename}.vcf"
+        
         with open(filename, "w", encoding="utf-8") as f:
             f.write("\n".join(vcf_content))
-    print("Done generating VCards")
+
+    print("Done generating VCards using mobileE164")
 
 if __name__ == "__main__":
     generate()
