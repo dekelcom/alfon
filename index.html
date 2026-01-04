@@ -35,7 +35,7 @@
 <body>
 
 <div class="header-section" onclick="showLogin()">
-    <div class="version-tag">V 3.2.2</div>
+    <div class="version-tag">V 3.2.3</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
     <small id="loginIndicator" style="color: #999;">(ניהול)</small>
@@ -184,13 +184,27 @@
         }
     }
 
-    function saveVCard(idx) {
-        const c = allContacts.find(item => item.rowIndex === idx);
-        const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name}\nORG:גדוד 882;${c.pluga}\nTEL;TYPE=CELL:${c.mobile}\nEND:VCARD`;
-        const uri = "data:text/vcard;charset=utf-8," + encodeURIComponent(vcard);
-        const link = document.createElement("a");
-        link.href = uri; link.download = `${c.name}.vcf`;
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    function saveVCard(evt, idx) {
+        if (evt) evt.preventDefault();
+        const c = allContacts.find(item => item.index === idx);
+        if (c) {
+            const orgDisplay = ["גדוד 882", c.pluga, c.framework, c.role].filter(p => p).join(" - ");
+            const vcard = [
+                "BEGIN:VCARD",
+                "VERSION:3.0",
+                `FN;CHARSET=UTF-8:${c.name} (גדוד 882)`,
+                `N;CHARSET=UTF-8:${c.lastName};${c.firstName};;;`,
+                `ORG;CHARSET=UTF-8:${orgDisplay}`,
+                `TEL;TYPE=CELL,VOICE:${c.mobile}`,
+                "END:VCARD"
+            ].join('\n');
+            const blob = new Blob(["\uFEFF", vcard], { type: "text/vcard;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.download = `${c.name}.vcf`;
+            a.href = url;
+            a.click();
+        }
     }
 
     async function checkLogin() {
