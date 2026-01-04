@@ -35,7 +35,7 @@
 <body>
 
 <div class="header-section" onclick="showLogin()">
-    <div class="version-tag">V 3.2.1</div>
+    <div class="version-tag">V 3.2.2</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
     <small id="loginIndicator" style="color: #999;">(ניהול)</small>
@@ -68,12 +68,12 @@
 <div id="addModal"><div class="modal-content">
     <h3>איש קשר חדש</h3>
     <form id="addForm">
+        <div class="form-group"><label>פלוגה:</label><select id="addPluga" onchange="updateAddFrameworkOptions()" required></select></div>
+        <div class="form-group"><label>מסגרת:</label><select id="addFramework" required><option value="">בחר פלוגה...</option></select></div>
+        <div class="form-group"><label>תפקיד:</label><input type="text" id="addRole"></div>
         <div class="form-group"><label>שם פרטי:</label><input type="text" id="addFirstName" required></div>
         <div class="form-group"><label>שם משפחה:</label><input type="text" id="addLastName" required></div>
         <div class="form-group"><label>טלפון:</label><input type="tel" id="addMobile" required dir="ltr"></div>
-        <div class="form-group"><label>תפקיד:</label><input type="text" id="addRole"></div>
-        <div class="form-group"><label>פלוגה:</label><select id="addPluga" onchange="updateAddFrameworkOptions()" required></select></div>
-        <div class="form-group"><label>מסגרת:</label><select id="addFramework" required></select></div>
         <button type="submit" class="btn-top" style="background:#28a745; color:white; width:100%; border:none; padding:12px;">הוסף</button>
         <button type="button" onclick="closeAddModal()" class="btn-top" style="background:#dc3545; color:white; width:100%; border:none; margin-top:10px; padding:12px;">ביטול</button>
     </form>
@@ -81,9 +81,9 @@
 
 <div id="loginModal"><div class="modal-content">
     <h3>כניסת מנהל</h3>
-    <input type="text" id="username" placeholder="משתמש">
-    <input type="password" id="password" placeholder="סיסמה">
-    <button onclick="checkLogin()" class="btn-top" style="background:var(--pakar-main); color:white; width:100%; border:none; margin-top:10px;">התחבר</button>
+    <input type="text" id="username" placeholder="משתמש" style="margin-bottom:10px;">
+    <input type="password" id="password" placeholder="סיסמה" style="margin-bottom:10px;">
+    <button onclick="checkLogin()" class="btn-top" style="background:var(--pakar-main); color:white; width:100%; border:none;">התחבר</button>
     <button onclick="closeLogin()" style="background:none; border:none; width:100%; margin-top:10px; color:#666;">ביטול</button>
 </div></div>
 
@@ -91,19 +91,19 @@
 
 <script>
     let allContacts = [];
-    let isLoggedIn = false;
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
     const MAIN_APP_URL = 'https://script.google.com/macros/s/AKfycbxpUF5SbyFwbF6b0unhJ9K6e66S0G4t9L_n-FkxREcUjVsbhXtFqh6T-_FgOuifIIhs/exec';
     const ADMIN_AUTH_URL = 'https://script.google.com/macros/s/AKfycbyDlBPvQ6qVc-KQuop7kXiYcylAdIrND0_NSmRpvHRwO4tjWcKdvSphSBrcW8y-9-Go/exec';
 
     function loadData(isRefresh = false) {
-        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;">מעדכן...</div>';
+        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;">מרענן נתונים...</div>';
         fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
                 header: true, skipEmptyLines: true,
                 complete: function(results) {
+                    // האינדקס כאן הוא מספר השורה בגיליון (0 זה הכותרות, אז השורה הראשונה היא 1)
                     allContacts = results.data.map((row, index) => ({
-                        index: index, 
+                        rowIndex: index + 2, 
                         pluga: row.pluga || "", 
                         framework: row.framework || "", 
                         role: row.role || "", 
@@ -128,18 +128,19 @@
                 <div class="card-actions">
                     <a href="tel:${c.mobile}" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon"><span class="action-text">חיוג</span></a>
                     <button onclick="openWA('${c.mobile}')" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon"><span class="action-text">WhatsApp</span></button>
-                    <button onclick="saveVCard(${c.index})" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/2874/2874050.png" class="action-icon"><span class="action-text">שמירה</span></button>
-                    <button onclick="handleEditClick(${c.index})" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" class="action-icon"><span class="action-text">עריכה</span></button>
+                    <button onclick="saveVCard(${c.rowIndex})" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/2874/2874050.png" class="action-icon"><span class="action-text">שמירה</span></button>
+                    <button onclick="handleEditClick(${c.rowIndex})" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" class="action-icon"><span class="action-text">עריכה</span></button>
                 </div>
             </div>`).join('');
     }
 
-    // שליחה בדיוק לפי סדר העמודות בתמונה: A=pluga, B=framework, C=role, D=firstName, E=lastName, F=mobile
+    // שליחה לשרת לפי סדר העמודות המדויק: A=pluga, B=framework, C=role, D=firstName, E=lastName, F=mobile
     document.getElementById('updateForm').onsubmit = async function(e) {
         e.preventDefault();
-        document.getElementById('statusMsg').innerText = "שומר...";
+        document.getElementById('statusMsg').innerText = "מעדכן גיליון...";
         const data = {
-            index: document.getElementById('editIndex').value,
+            sheetName: "data",
+            index: document.getElementById('editIndex').value, // מספר השורה לעדכון
             pluga: document.getElementById('editPluga').value,
             framework: document.getElementById('editFramework').value,
             role: document.getElementById('editRole').value,
@@ -149,13 +150,14 @@
         };
         await fetch(MAIN_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
         closeUpdateModal(); 
-        setTimeout(() => loadData(true), 1200);
+        setTimeout(() => loadData(true), 1500);
     };
 
     document.getElementById('addForm').onsubmit = async function(e) {
         e.preventDefault();
         const data = {
             action: 'addContact',
+            sheetName: "data",
             pluga: document.getElementById('addPluga').value,
             framework: document.getElementById('addFramework').value,
             role: document.getElementById('addRole').value,
@@ -165,25 +167,25 @@
         };
         await fetch(MAIN_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
         closeAddModal(); 
-        setTimeout(() => loadData(true), 1200);
+        setTimeout(() => loadData(true), 1500);
     };
 
     function handleEditClick(idx) {
-        const c = allContacts.find(item => item.index === idx);
+        const c = allContacts.find(item => item.rowIndex === idx);
         if (c) {
-            document.getElementById('editIndex').value = c.index;
+            document.getElementById('editIndex').value = c.rowIndex;
+            document.getElementById('editPluga').value = c.pluga;
+            document.getElementById('editFramework').value = c.framework;
             document.getElementById('editFirstName').value = c.firstName;
             document.getElementById('editLastName').value = c.lastName;
             document.getElementById('editMobile').value = c.mobile;
             document.getElementById('editRole').value = c.role;
-            document.getElementById('editPluga').value = c.pluga;
-            document.getElementById('editFramework').value = c.framework;
             document.getElementById('updateModal').style.display = 'block';
         }
     }
 
     function saveVCard(idx) {
-        const c = allContacts.find(item => item.index === idx);
+        const c = allContacts.find(item => item.rowIndex === idx);
         const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${c.name}\nORG:גדוד 882;${c.pluga}\nTEL;TYPE=CELL:${c.mobile}\nEND:VCARD`;
         const uri = "data:text/vcard;charset=utf-8," + encodeURIComponent(vcard);
         const link = document.createElement("a");
@@ -194,11 +196,15 @@
     async function checkLogin() {
         const u = document.getElementById('username').value;
         const p = document.getElementById('password').value;
-        const resp = await fetch(ADMIN_AUTH_URL, { method: 'POST', body: JSON.stringify({ action: 'checkLogin', user: u, pass: p }) });
-        const res = await resp.text();
-        if (res === "AUTHORIZED") {
-            isLoggedIn = true; document.getElementById('addNewBtn').classList.remove('hidden'); closeLogin();
-        } else { alert("פרטים שגויים"); }
+        try {
+            const resp = await fetch(ADMIN_AUTH_URL, { method: 'POST', body: JSON.stringify({ action: 'checkLogin', user: u, pass: p }) });
+            const res = await resp.text();
+            if (res === "AUTHORIZED") {
+                document.getElementById('addNewBtn').classList.remove('hidden');
+                document.getElementById('loginIndicator').innerText = "(מחובר)";
+                closeLogin();
+            } else { alert("פרטים שגויים"); }
+        } catch (e) { alert("שגיאת חיבור"); }
     }
 
     function openAddModal() {
