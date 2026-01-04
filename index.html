@@ -270,7 +270,16 @@
         status.innerText = "עודכן!";
         setTimeout(() => { closeUpdateModal(); loadData(true); }, 1500);
     };
-
+    
+    function populateAddPlugaOptions() {
+    const plugaSel = document.getElementById('addPluga');
+    // שואב את רשימת הפלוגות הייחודיות מהנתונים הקיימים
+    const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
+    let opts = '<option value="">בחר פלוגה...</option>';
+    plugot.forEach(p => opts += `<option value="${p}">${p}</option>`);
+    plugaSel.innerHTML = opts;
+    }
+    
     // פונקציות עזר
     function saveVCard(evt, idx) {
         const c = allContacts.find(item => item.index === idx);
