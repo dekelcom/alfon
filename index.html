@@ -15,20 +15,16 @@
         .flex-row { display: flex; gap: 6px; margin-bottom: 8px; }
         input, select { padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px !important; width: 100%; box-sizing: border-box; background: white; }
         .btn-top { background: white; border: 1px solid #ccc; border-radius: 8px; padding: 10px; font-weight: bold; color: var(--pakar-main); cursor: pointer; }
-        
         .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
         @media (min-width: 900px) { .contacts-grid { grid-template-columns: repeat(4, 1fr); } }
-        
         .contact-card { background: white; border-radius: 12px; padding: 12px 5px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; text-align: center; }
         .name-header { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; }
         .info-sub { font-size: 0.8rem; color: #666; margin-bottom: 8px; min-height: 50px; }
         .phone-display { font-size: 0.85rem; font-weight: bold; margin: 5px 0; direction: ltr; }
-        
         .card-actions { display: flex; border-top: 1px solid #eee; padding-top: 8px; margin-top: auto; gap: 2px; }
         .action-link { flex: 1; text-decoration: none; color: #333; display: flex; flex-direction: column; align-items: center; cursor: pointer; background: none; border: none; padding: 2px; }
         .action-icon { width: 22px; height: 22px; margin-bottom: 2px; }
         .action-text { font-size: 0.6rem; font-weight: bold; }
-        
         #updateModal, #addModal, #loginModal { display:none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); overflow-y: auto; }
         .modal-content { background: white; margin: 10% auto; padding: 20px; border-radius: 12px; width: 85%; max-width: 400px; position: relative; }
         .form-group { margin-bottom: 12px; text-align: right; }
@@ -39,10 +35,10 @@
 <body>
 
 <div class="header-section" onclick="showLogin()">
-    <div class="version-tag">V 3.1.3</div>
+    <div class="version-tag">V 3.1.5</div>
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Pakar.svg/960px-Pakar.svg.png" class="unit-logo">
     <h4 style="margin:5px 0 0">גדוד 882 - אלפון</h4>
-    <small id="loginIndicator" style="color: #999;">(לחץ כאן לניהול)</small>
+    <small id="loginIndicator" style="color: #999;">(ניהול מנהל)</small>
 </div>
 
 <div class="search-container">
@@ -50,64 +46,56 @@
         <input type="text" id="searchInput" placeholder="חיפוש..." oninput="filterContacts()">
         <button onclick="resetAll()" class="btn-top">נקה</button>
     </div>
-    <button id="addNewBtn" onclick="openAddModal()" class="btn-top hidden" style="background:#28a745; color:white; width:100%; border:none; margin-top:5px;">+ הוספת איש קשר חדש</button>
+    <button id="addNewBtn" onclick="openAddModal()" class="btn-top hidden" style="background:#28a745; color:white; width:100%; border:none; margin-top:5px;">+ הוספת איש קשר</button>
 </div>
 
-<div id="loginModal">
-    <div class="modal-content">
-        <h3 style="text-align:center;">כניסת מנהל</h3>
-        <input type="text" id="username" placeholder="שם משתמש" style="margin-bottom:10px;">
-        <input type="password" id="password" placeholder="סיסמה" style="margin-bottom:10px;">
-        <button onclick="checkLogin()" class="btn-top" style="background:var(--pakar-main); color:white; width:100%; border:none;">התחבר</button>
-        <div id="loginStatus" style="text-align:center; margin-top:10px;"></div>
-        <button onclick="closeLogin()" style="background:none; border:none; width:100%; margin-top:10px; color:#666;">ביטול</button>
-    </div>
-</div>
+<div id="loginModal"><div class="modal-content">
+    <h3>כניסת מנהל</h3>
+    <input type="text" id="username" placeholder="משתמש" style="margin-bottom:10px;">
+    <input type="password" id="password" placeholder="סיסמה" style="margin-bottom:10px;">
+    <button onclick="checkLogin()" class="btn-top" style="background:var(--pakar-main); color:white; width:100%; border:none;">התחבר</button>
+    <button onclick="closeLogin()" style="background:none; border:none; width:100%; margin-top:10px; color:#666;">ביטול</button>
+</div></div>
 
-<div id="addModal">
-    <div class="modal-content">
-        <h3 style="text-align: center; color: var(--pakar-main);">איש קשר חדש</h3>
-        <form id="addForm">
-            <div class="form-group"><label>שם פרטי:</label><input type="text" id="addFirstName" required></div>
-            <div class="form-group"><label>שם משפחה:</label><input type="text" id="addLastName" required></div>
-            <div class="form-group"><label>טלפון:</label><input type="tel" id="addMobile" required dir="ltr"></div>
-            <div class="form-group"><label>תפקיד:</label><input type="text" id="addRole"></div>
-            <div class="form-group"><label>פלוגה:</label><select id="addPluga" onchange="updateAddFrameworkOptions()" required></select></div>
-            <div class="form-group"><label>מסגרת:</label><select id="addFramework" required><option value="">בחר פלוגה...</option></select></div>
-            <button type="submit" class="btn-top" style="background: #28a745; color: white; width: 100%; border: none; padding: 12px;">שמור</button>
-            <button type="button" onclick="closeAddModal()" class="btn-top" style="background: #dc3545; color: white; width: 100%; border: none; padding: 12px; margin-top: 10px;">ביטול</button>
-        </form>
-        <div id="addStatusMsg" style="text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
+<div id="addModal"><div class="modal-content">
+    <h3>איש קשר חדש</h3>
+    <form id="addForm">
+        <div class="form-group"><label>שם פרטי:</label><input type="text" id="addFirstName" required></div>
+        <div class="form-group"><label>שם משפחה:</label><input type="text" id="addLastName" required></div>
+        <div class="form-group"><label>טלפון:</label><input type="tel" id="addMobile" required dir="ltr"></div>
+        <div class="form-group"><label>תפקיד:</label><input type="text" id="addRole"></div>
+        <div class="form-group"><label>פלוגה:</label><select id="addPluga" onchange="updateAddFrameworkOptions()" required></select></div>
+        <div class="form-group"><label>מסגרת:</label><select id="addFramework" required></select></div>
+        <button type="submit" class="btn-top" style="background:#28a745; color:white; width:100%; border:none;">שמור</button>
+        <button type="button" onclick="closeAddModal()" class="btn-top" style="background:#dc3545; color:white; width:100%; border:none; margin-top:10px;">ביטול</button>
+    </form>
+</div></div>
 
-<div id="updateModal">
-    <div class="modal-content">
-        <h3 style="text-align: center; color: var(--pakar-main);">עדכון פרטי קשר</h3>
-        <form id="updateForm">
-            <div class="form-group"><label>שם פרטי:</label><input type="text" id="editFirstName" required></div>
-            <div class="form-group"><label>שם משפחה:</label><input type="text" id="editLastName" required></div>
-            <div class="form-group"><label>טלפון:</label><input type="tel" id="editMobile" required dir="ltr"></div>
-            <div class="form-group"><label>תפקיד:</label><input type="text" id="editRole"></div>
-            <button type="submit" class="btn-top" style="background: #28a745; color: white; width: 100%; border: none; padding: 12px;">שמור עדכון</button>
-            <button type="button" onclick="closeUpdateModal()" class="btn-top" style="background: #dc3545; color: white; width: 100%; border: none; padding: 12px; margin-top: 10px;">ביטול</button>
-        </form>
-        <div id="statusMsg" style="text-align: center; margin-top: 10px;"></div>
-    </div>
-</div>
+<div id="updateModal"><div class="modal-content">
+    <h3>עדכון פרטים</h3>
+    <form id="updateForm">
+        <input type="hidden" id="editIndex">
+        <div class="form-group"><label>שם פרטי:</label><input type="text" id="editFirstName" required></div>
+        <div class="form-group"><label>שם משפחה:</label><input type="text" id="editLastName" required></div>
+        <div class="form-group"><label>טלפון:</label><input type="tel" id="editMobile" required dir="ltr"></div>
+        <div class="form-group"><label>תפקיד:</label><input type="text" id="editRole"></div>
+        <button type="submit" class="btn-top" style="background:#28a745; color:white; width:100%; border:none;">עדכן</button>
+        <button type="button" onclick="closeUpdateModal()" class="btn-top" style="background:#dc3545; color:white; width:100%; border:none; margin-top:10px;">ביטול</button>
+    </form>
+    <div id="statusMsg" style="text-align:center; margin-top:10px;"></div>
+</div></div>
 
 <div id="contactsGrid" class="contacts-grid"></div>
 
 <script>
     let allContacts = [];
     let isLoggedIn = false;
-    
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZEVFw70pjDNKkIa4JxtpuTu_pizLLb-YTPtyk5WTNRC2hz5PvUqiDXh4OyonQjsDEmqT4cGjhzG1r/pub?gid=1397364136&single=true&output=csv';
     const MAIN_APP_URL = 'https://script.google.com/macros/s/AKfycbxpUF5SbyFwbF6b0unhJ9K6e66S0G4t9L_n-FkxREcUjVsbhXtFqh6T-_FgOuifIIhs/exec';
     const ADMIN_AUTH_URL = 'https://script.google.com/macros/s/AKfycbyDlBPvQ6qVc-KQuop7kXiYcylAdIrND0_NSmRpvHRwO4tjWcKdvSphSBrcW8y-9-Go/exec';
 
     function loadData(isRefresh = false) {
-        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px;">טוען...</div>';
+        if (isRefresh) document.getElementById('contactsGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;">טוען...</div>';
         fetch(csvUrl + '&t=' + Date.now()).then(r => r.text()).then(txt => {
             Papa.parse(txt, {
                 header: true, skipEmptyLines: true,
@@ -133,50 +121,41 @@
                 <div class="card-actions">
                     <a href="tel:${c.mobile}" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/3616/3616215.png" class="action-icon"><span class="action-text">חיוג</span></a>
                     <button onclick="openWA('${c.mobile}')" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/3670/3670051.png" class="action-icon"><span class="action-text">הודעה</span></button>
-                    <button onclick="saveVCard(event, ${c.index})" class="action-link"><img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon"><span class="action-text">שמירה</span></button>
+                    <button onclick="saveVCard(${c.index})" class="action-link"><img src="https://em-content.zobj.net/source/facebook/431/floppy-disk_1f4be.png" class="action-icon"><span class="action-text">שמירה</span></button>
                     <button onclick="handleEditClick(${c.index})" class="action-link"><img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" class="action-icon"><span class="action-text">עריכה</span></button>
                 </div>
             </div>`).join('');
     }
 
+    // פונקציית שמירה מעודכנת שעובדת גם ב-Safari
+    function saveVCard(idx) {
+        const c = allContacts.find(item => item.index === idx);
+        const vcard = "BEGIN:VCARD\nVERSION:3.0\nFN:" + c.name + "\nTEL;TYPE=CELL:" + c.mobile + "\nEND:VCARD";
+        const uri = "data:text/vcard;charset=utf-8," + encodeURIComponent(vcard);
+        const link = document.createElement("a");
+        link.href = uri;
+        link.download = c.name + ".vcf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     async function checkLogin() {
         const u = document.getElementById('username').value;
         const p = document.getElementById('password').value;
-        const status = document.getElementById('loginStatus');
-        status.innerText = "בודק...";
-        try {
-            const resp = await fetch(ADMIN_AUTH_URL, { method: 'POST', body: JSON.stringify({ action: 'checkLogin', user: u, pass: p }) });
-            const res = await resp.text();
-            if (res === "AUTHORIZED") {
-                isLoggedIn = true;
-                document.getElementById('addNewBtn').classList.remove('hidden');
-                document.getElementById('loginIndicator').innerText = "(מחובר: " + u + ")";
-                closeLogin();
-            } else { status.innerText = "טעות בפרטים"; }
-        } catch (e) { status.innerText = "שגיאה"; }
-    }
-
-    function openAddModal() {
-        const pSel = document.getElementById('addPluga');
-        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
-        let options = '<option value="">בחר פלוגה...</option>';
-        plugot.forEach(p => options += `<option value="${p}">${p}</option>`);
-        pSel.innerHTML = options;
-        document.getElementById('addModal').style.display = 'block';
-    }
-
-    function updateAddFrameworkOptions() {
-        const pVal = document.getElementById('addPluga').value;
-        const fSel = document.getElementById('addFramework');
-        const frames = [...new Set(allContacts.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
-        let opts = '<option value="">בחר מסגרת...</option>';
-        frames.forEach(f => opts += `<option value="${f}">${f}</option>`);
-        fSel.innerHTML = opts;
+        const resp = await fetch(ADMIN_AUTH_URL, { method: 'POST', body: JSON.stringify({ action: 'checkLogin', user: u, pass: p }) });
+        const res = await resp.text();
+        if (res === "AUTHORIZED") {
+            isLoggedIn = true;
+            document.getElementById('addNewBtn').classList.remove('hidden');
+            closeLogin();
+        } else { alert("טעות בפרטים"); }
     }
 
     function handleEditClick(idx) {
         const c = allContacts.find(item => item.index === idx);
         if (c) {
+            document.getElementById('editIndex').value = c.index;
             document.getElementById('editFirstName').value = c.firstName;
             document.getElementById('editLastName').value = c.lastName;
             document.getElementById('editMobile').value = c.mobile;
@@ -187,20 +166,18 @@
         }
     }
 
-    function saveVCard(evt, idx) {
-        const c = allContacts.find(item => item.index === idx);
-        if (c) {
-            const vcard = ["BEGIN:VCARD","VERSION:3.0",`FN:${c.name}`,`TEL;TYPE=CELL:${c.mobile}`,"END:VCARD"].join('\n');
-            const blob = new Blob(["\uFEFF", vcard], { type: "text/vcard;charset=utf-8" });
-            const a = document.createElement('a'); a.download = `${c.name}.vcf`; a.href = URL.createObjectURL(blob); a.click();
-        }
-    }
-
-    function openWA(mob) {
-        let clean = mob.replace(/\D/g, '');
-        if (clean.startsWith('0')) clean = '972' + clean.substring(1);
-        window.open(`https://wa.me/${clean}`, '_blank');
-    }
+    document.getElementById('updateForm').onsubmit = async function(e) {
+        e.preventDefault();
+        document.getElementById('statusMsg').innerText = "מעדכן...";
+        const data = {
+            index: document.getElementById('editIndex').value,
+            firstName: document.getElementById('editFirstName').value, lastName: document.getElementById('editLastName').value,
+            mobile: document.getElementById('editMobile').value, role: document.getElementById('editRole').value,
+            pluga: this.dataset.pluga, framework: this.dataset.framework
+        };
+        await fetch(MAIN_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        closeUpdateModal(); loadData(true);
+    };
 
     document.getElementById('addForm').onsubmit = async function(e) {
         e.preventDefault();
@@ -214,16 +191,27 @@
         closeAddModal(); loadData(true);
     };
 
-    document.getElementById('updateForm').onsubmit = async function(e) {
-        e.preventDefault();
-        const data = {
-            firstName: document.getElementById('editFirstName').value, lastName: document.getElementById('editLastName').value,
-            mobile: document.getElementById('editMobile').value, role: document.getElementById('editRole').value,
-            pluga: this.dataset.pluga, framework: this.dataset.framework
-        };
-        await fetch(MAIN_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-        closeUpdateModal(); loadData(true);
-    };
+    function openWA(mob) {
+        let clean = mob.replace(/\D/g, '');
+        if (clean.startsWith('0')) clean = '972' + clean.substring(1);
+        window.open(`https://wa.me/${clean}`, '_blank');
+    }
+
+    function openAddModal() {
+        const plugot = [...new Set(allContacts.map(c => c.pluga))].filter(Boolean).sort();
+        let options = '<option value="">בחר פלוגה...</option>';
+        plugot.forEach(p => options += `<option value="${p}">${p}</option>`);
+        document.getElementById('addPluga').innerHTML = options;
+        document.getElementById('addModal').style.display = 'block';
+    }
+
+    function updateAddFrameworkOptions() {
+        const pVal = document.getElementById('addPluga').value;
+        const frames = [...new Set(allContacts.filter(c => c.pluga === pVal).map(c => c.framework))].filter(Boolean).sort();
+        let opts = '<option value="">בחר מסגרת...</option>';
+        frames.forEach(f => opts += `<option value="${f}">${f}</option>`);
+        document.getElementById('addFramework').innerHTML = opts;
+    }
 
     function showLogin() { document.getElementById('loginModal').style.display = 'block'; }
     function closeLogin() { document.getElementById('loginModal').style.display = 'none'; }
@@ -234,7 +222,6 @@
         renderContacts(allContacts.filter(c => c.searchKey.includes(term)));
     }
     function resetAll() { document.getElementById('searchInput').value = ""; renderContacts(allContacts); }
-
     loadData();
 </script>
 </body>
